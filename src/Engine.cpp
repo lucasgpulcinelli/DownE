@@ -72,6 +72,8 @@ Engine::Engine(void) {
   glEnable(GL_DEBUG_OUTPUT);
   glDebugMessageCallback(messageCallback, 0);
 
+  glEnable(GL_DEPTH_TEST);
+
   info("engine initalized");
 }
 
