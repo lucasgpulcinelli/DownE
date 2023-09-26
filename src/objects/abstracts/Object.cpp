@@ -16,6 +16,8 @@ std::map<std::string, std::pair<int, int>> Object::shader_map;
 
 namespace {
 
+// getShaderType returns the opengl type of the shader in the file using its
+// filename.
 GLenum getShaderType(const fs::directory_entry shader_file) {
   auto filename = shader_file.path().filename().string();
 
@@ -29,6 +31,8 @@ GLenum getShaderType(const fs::directory_entry shader_file) {
   error("invalid shader filename: " << filename);
 }
 
+// readFileIntoString reads a complete file and returns a NULL terminated
+// character pointer to it. This pointer should be freed with C style free.
 char *readFileIntoString(const char *filename) {
   FILE *fptr = fopen(filename, "r");
 
@@ -36,31 +40,42 @@ char *readFileIntoString(const char *filename) {
   int size = ftell(fptr);
   fseek(fptr, 0, SEEK_SET);
 
-  char *data = (char *)malloc(size);
+  char *data = (char *)malloc(size + 1);
 
   fread(data, 1, size, fptr);
+  data[size] = '\0';
 
   fclose(fptr);
   return data;
 }
 
+// compileShader compiles a shader and returns its id, erroring out if any
+// problems happen.
 int compileShader(std::string shader_name) {
   const fs::path program_path = "res/shaders/" + shader_name;
+
+  // read the shader directory
   auto program_dir = fs::directory_entry(program_path);
 
   std::string program_name = program_dir.path().filename();
 
+  // create our new program that will be returned
   GLuint program_id = glCreateProgram();
 
+  // for each shader source code
   for (const auto &shader_file : fs::directory_iterator(program_dir)) {
+    // get its type
     GLenum shader_type = getShaderType(shader_file);
 
+    // read the code
     char *source = readFileIntoString(shader_file.path().c_str());
 
+    // create the shader of that code and compile it
     GLuint shader_id = glCreateShader(shader_type);
     glShaderSource(shader_id, 1, &source, NULL);
     glCompileShader(shader_id);
 
+    // see if we were able to compile it correctly
     GLint successful;
     glGetShaderiv(shader_id, GL_COMPILE_STATUS, &successful);
 
@@ -75,11 +90,13 @@ int compileShader(std::string shader_name) {
       error("error compiling shader:" << std::endl << error_log);
     }
 
+    // attach the shader to the main program
     glAttachShader(program_id, shader_id);
 
     free(source);
   }
 
+  // link all the shaders to the final program
   glLinkProgram(program_id);
 
   return program_id;

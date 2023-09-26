@@ -36,6 +36,10 @@ void Engine::inputCallback(__attribute__((unused)) GLFWwindow *w, int key,
 }
 
 Engine::Engine(void) {
+  if (Engine::single_engine != nullptr) {
+    error("creating an engine when other already exists");
+  }
+
   Engine::single_engine = this;
 
   info("initilizing engine");
@@ -51,6 +55,7 @@ Engine::Engine(void) {
   const auto *mode = glfwGetVideoMode(monitor);
   this->width = mode->width;
   this->height = mode->height;
+  this->refresh_rate = mode->refreshRate;
 
   debug("creating window");
   window = glfwCreateWindow(mode->width, mode->height, "main engine", monitor,
@@ -88,6 +93,7 @@ Engine *Engine::getEngine(void) { return single_engine; }
 
 void Engine::run(void) {
   info("starting main loop");
+
   while (!glfwWindowShouldClose(window)) {
     auto time = glfwGetTime();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -98,9 +104,12 @@ void Engine::run(void) {
 
     glfwPollEvents();
 
-    auto sleep_time = glfwGetTime() - time;
-    if (sleep_time > 0) {
-      std::this_thread::sleep_for(std::chrono::duration<double>(sleep_time));
+    // framerate cap at the monitor refresh rate
+    // TODO: this should be configurable
+    auto delta = glfwGetTime() - time;
+    if (delta < 1.0f / refresh_rate) {
+      std::this_thread::sleep_for(
+          std::chrono::duration<double>(1.0f / refresh_rate - delta));
     }
 
     glfwSwapBuffers(window);
