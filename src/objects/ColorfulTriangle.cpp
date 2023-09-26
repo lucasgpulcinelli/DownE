@@ -33,6 +33,7 @@ ColorfulTriangle::ColorfulTriangle(float x, float y, float scale, float angle)
   glGenBuffers(1, &vertex_buffer_id);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id);
 
+  // hardcoded regular triangle with upwards vertex in red.
   float points[] = {0,    0.5326920704511053, 1, 0, 0, 0.5, -1.0 / 3, 0, 1, 0,
                     -0.5, -1.0 / 3,           0, 0, 1};
 
@@ -74,6 +75,10 @@ void ColorfulTriangle::draw(int w, int h) {
   float mat_translation[] = {
       1.0f * h / w, 0, 0, x * h / w, 0, 1.0f, 0, y, 0, 0, 1, 0, 0, 0, 0, 1};
 
+  // because in mesa's implementation the operation does not do anything when
+  // the vertex_array_id is the same as the previous one, it is safe to assume
+  // this call is cheap, since only the first ColorfulTriangle will actualy bind
+  // the vertex array object in a frame.
   glBindVertexArray(vertex_array_id);
 
   GLuint loc = glGetUniformLocation(properties[0], "mat_scale");
