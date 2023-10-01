@@ -16,7 +16,7 @@ clean:
 	@rm -f $(ZIPFILE)
 	@rm -rf build/
 
-debug: CXXFLAGS+=-g3 -O0 -DDEBUG
+debug: CXXFLAGS+=-g3 -DDEBUG
 debug: clean
 debug: $(EXECUTABLE)
 

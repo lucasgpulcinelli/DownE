@@ -116,6 +116,10 @@ void Engine::run(void) {
 
     glfwSwapBuffers(window);
   }
+
+  for (auto vec_objs : objects_map) {
+    delete vec_objs.second;
+  }
 }
 
 void Engine::addObject(objects::Object *obj) {

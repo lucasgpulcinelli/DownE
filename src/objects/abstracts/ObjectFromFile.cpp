@@ -114,8 +114,6 @@ ObjectFromFile::ObjectFromFile(std::string shader_name, std::string mesh_name)
 }
 
 ObjectFromFile::~ObjectFromFile(void) {
-  Object::~Object();
-
   auto &t = mesh_map[mesh_name];
 
   if (std::get<2>(t)-- != 1) {

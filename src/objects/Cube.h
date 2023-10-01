@@ -17,7 +17,6 @@ public:
   void draw(int w, int h) override {
     ObjectFromFile::draw(w, h);
 
-    debug(mesh_size);
     glDrawArrays(GL_TRIANGLES, 0, mesh_size/3);
   }
 };

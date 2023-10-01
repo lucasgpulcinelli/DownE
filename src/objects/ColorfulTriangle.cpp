@@ -53,8 +53,6 @@ ColorfulTriangle::ColorfulTriangle(float x, float y, float scale, float angle)
 }
 
 ColorfulTriangle::~ColorfulTriangle(void) {
-  Object::~Object();
-
   debug("deleting colorful triangle");
   if (count-- != 1) {
     return;

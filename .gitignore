@@ -3,5 +3,5 @@
 !.clang-*
 
 build
+shell.nix
 compile_commands.json
-
