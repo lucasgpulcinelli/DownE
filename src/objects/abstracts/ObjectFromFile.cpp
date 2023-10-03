@@ -6,6 +6,7 @@ extern "C" {
 #include <GL/glew.h>
 }
 
+#include <cstdio>
 #include <fstream>
 #include <sstream>
 
@@ -16,6 +17,46 @@ std::map<std::string, std::tuple<uint32_t, uint32_t, int>>
 
 namespace {
 
+void storeFace(std::vector<float> &tris, std::vector<float> &verticies,
+               std::vector<float> &textures, std::istringstream &stream) {
+  std::vector<std::pair<int, int>> tri_indicies;
+  int vi, vti, vni;
+  std::string word;
+
+  while (stream >> word) {
+    // we do not support %d//%d
+    int read = std::sscanf(word.c_str(), "%d/%d/%d", &vi, &vti, &vni);
+    if (read <= 0) {
+      error("mesh file is incorrect");
+    }
+    if (read == 1) {
+      error("loading meshes without textures not supported");
+    }
+
+    tri_indicies.push_back({vi - 1, vti - 1});
+  }
+
+  for (int i = 1; i < (int)tri_indicies.size() - 1; i++) {
+    for (int j = 0; j < 3; j++) {
+      tris.push_back(verticies[tri_indicies[0].first * 3 + j]);
+    }
+    tris.push_back(textures[tri_indicies[0].second * 2]);
+    tris.push_back(textures[tri_indicies[0].second * 2 + 1]);
+
+    for (int j = 0; j < 3; j++) {
+      tris.push_back(verticies[tri_indicies[i].first * 3 + j]);
+    }
+    tris.push_back(textures[tri_indicies[i].second * 2]);
+    tris.push_back(textures[tri_indicies[i].second * 2 + 1]);
+
+    for (int j = 0; j < 3; j++) {
+      tris.push_back(verticies[tri_indicies[i + 1].first * 3 + j]);
+    }
+    tris.push_back(textures[tri_indicies[i + 1].second * 2]);
+    tris.push_back(textures[tri_indicies[i + 1].second * 2 + 1]);
+  }
+}
+
 // readMeshTris reads all tris in a file in the wavefont obj format and return a
 // vector of vertex coordinates of the object, ordered for use with glDrawArrays
 // in the GL_TRIANGLES mode.
@@ -23,6 +64,7 @@ std::vector<float> readMeshTris(std::string mesh_path) {
   std::fstream f(mesh_path, std::ios_base::in);
 
   std::vector<float> verticies;
+  std::vector<float> textures;
   std::vector<float> tris;
 
   std::string line;
@@ -37,29 +79,13 @@ std::vector<float> readMeshTris(std::string mesh_path) {
       verticies.push_back(x);
       verticies.push_back(y);
       verticies.push_back(z);
+    } else if (s == "vt") {
+      float u, v;
+      stream >> u >> v;
+      textures.push_back(u);
+      textures.push_back(v);
     } else if (s == "f") {
-      std::vector<int> tri_indicies;
-      int vi;
-      while (stream >> vi) {
-        std::string discard;
-        stream >> discard;
-        tri_indicies.push_back(vi - 1);
-      }
-
-      for (int i = 1; i < (int)tri_indicies.size() - 1; i++) {
-        for (int j = 0; j < 3; j++) {
-          tris.push_back(verticies[tri_indicies[0] * 3 + j]);
-        }
-
-
-        for (int j = 0; j < 3; j++) {
-          tris.push_back(verticies[tri_indicies[i] * 3 + j]);
-        }
-
-        for (int j = 0; j < 3; j++) {
-          tris.push_back(verticies[tri_indicies[i + 1] * 3 + j]);
-        }
-      }
+      storeFace(tris, verticies, textures, stream);
     }
   }
 
@@ -88,7 +114,12 @@ std::pair<uint32_t, uint32_t> ObjectFromFile::loadMesh(void) {
 
   GLint loc = glGetAttribLocation(properties[0], "point");
   glEnableVertexAttribArray(loc);
-  glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
+  glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), NULL);
+
+  loc = glGetAttribLocation(properties[0], "color");
+  glEnableVertexAttribArray(loc);
+  glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+                        (void *)(sizeof(float) * 3));
 
   return {vertex_array_id, vertex_buffer_id};
 }
