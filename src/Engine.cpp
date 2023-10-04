@@ -3,7 +3,6 @@
 #include "objects/abstracts/Object.h"
 #include "utils.h"
 
-#include <filesystem>
 #include <iostream>
 #include <thread>
 
@@ -96,12 +95,49 @@ Engine *Engine::getEngine(void) { return single_engine; }
 void Engine::run(void) {
   info("starting main loop");
 
+  std::thread frame_thread([this]() {
+    while (!glfwWindowShouldClose(window)) {
+      auto time = glfwGetTime();
+
+      for(auto* obj : object_set){
+        obj->frame();
+      }
+
+      // framerate cap at the monitor refresh rate
+      // TODO: this should be configurable
+      auto delta = glfwGetTime() - time;
+      if (delta < 1.0f / refresh_rate) {
+        std::this_thread::sleep_for(
+            std::chrono::duration<double>(1.0f / refresh_rate - delta));
+      }
+    }
+  });
+
   while (!glfwWindowShouldClose(window)) {
     auto time = glfwGetTime();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (auto vec_objs : objects_map) {
-      vec_objs.second->draw(width, height);
+    int curr_shader = -1;
+    int curr_texture = -1;
+    int curr_vao = -1;
+
+    for (auto drawable : drawable_set) {
+      if (curr_shader != std::get<0>(drawable)) {
+        curr_shader = std::get<0>(drawable);
+        glUseProgram(curr_shader);
+      }
+
+      if (curr_texture != std::get<1>(drawable) &&
+          std::get<1>(drawable) != -1) {
+        curr_texture = std::get<1>(drawable);
+      }
+
+      if (curr_vao != std::get<2>(drawable)) {
+        curr_vao = std::get<2>(drawable);
+        glBindVertexArray(curr_vao);
+      }
+
+      std::get<3>(drawable)->draw(curr_texture, curr_vao);
     }
 
     glfwPollEvents();
@@ -117,19 +153,27 @@ void Engine::run(void) {
     glfwSwapBuffers(window);
   }
 
-  for (auto vec_objs : objects_map) {
-    delete vec_objs.second;
+  for (auto *obj : object_set) {
+    delete obj;
   }
+
+  frame_thread.join();
 }
 
-void Engine::addObject(objects::Object *obj) {
-  auto &v = obj->getProperties();
-  objects_map[v] = obj;
+void Engine::addObject(Object *obj) {
+  for (auto drawable : obj->getDrawables()) {
+    drawable_set.insert(drawable);
+  }
+
+  object_set.insert(obj);
 }
 
-void Engine::deleteObject(objects::Object *obj) {
-  auto v = obj->getProperties();
-  objects_map.erase(v);
+void Engine::deleteObject(Object *obj) {
+  object_set.erase(obj);
+
+  for (auto drawable : obj->getDrawables()) {
+    drawable_set.erase(drawable);
+  }
 
   delete obj;
 }

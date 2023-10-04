@@ -9,17 +9,19 @@ extern "C" {
 #include <GLFW/glfw3.h>
 }
 
-using namespace objects;
+using namespace engine;
 
-void ColorfulSpaceship::draw(int w, int h) {
-  auto keys = engine::Engine::getEngine()->getPressedKeys();
+void ColorfulSpaceship::frame(void) {
+  auto w_h = Engine::getEngine()->getWindowSize();
+  auto r = (float)w_h.first / w_h.second;
+  auto keys = Engine::getEngine()->getPressedKeys();
 
   if (keys.find(GLFW_KEY_UP) != keys.end()) {
     vx -= sin(angle) * 0.005 * scale;
     vy += cos(angle) * 0.005 * scale;
   }
   if (keys.find(GLFW_KEY_DOWN) != keys.end()) {
-    vx += sin(angle) * 0.001 * scale;
+    vx += sin(angle) * 0.001 * scale*r;
     vy -= cos(angle) * 0.001 * scale;
   }
   if (keys.find(GLFW_KEY_LEFT) != keys.end()) {
@@ -38,11 +40,11 @@ void ColorfulSpaceship::draw(int w, int h) {
   x += vx;
   y += vy;
 
-  if (x > 0.9 * w / h) {
-    x = 0.9 * w / h;
+  if (x > 0.9*r) {
+    x = 0.9*r;
     vx = 0;
-  } else if (x < -0.9 * w / h) {
-    x = -0.9 * w / h;
+  } else if (x < -0.9*r) {
+    x = -0.9*r;
     vx = 0;
   }
   if (y > 0.9) {
@@ -56,6 +58,4 @@ void ColorfulSpaceship::draw(int w, int h) {
   if (scale < 0.1) {
     scale = 0.1;
   }
-
-  ColorfulTriangle::draw(w, h);
 }

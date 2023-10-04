@@ -1,6 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <functional>
 #include <map>
 #include <set>
 #include <vector>
@@ -10,11 +11,10 @@ extern "C" {
 #include <GLFW/glfw3.h>
 }
 
-namespace objects {
-class Object;
-} // namespace objects
-
 namespace engine {
+
+class Object;
+typedef std::tuple<int, int, int, Object*> drawable;
 
 // class Engine defines the main game manager as a singleton. When constructed,
 // a GLFW window is opened where all the game actions happen. It manages both
@@ -50,10 +50,10 @@ public:
   void run(void);
 
   // addObject adds a new Object to be managed by the main drawing loop.
-  void addObject(objects::Object *obj);
+  void addObject(Object *obj);
 
   // deleteObject removes an already managed object from the main drawing loop.
-  void deleteObject(objects::Object *obj);
+  void deleteObject(Object *obj);
 
 private:
   // the window size.
@@ -62,20 +62,9 @@ private:
   // the monitor refresh rate, used in the drawing loop
   int refresh_rate;
 
-  // the main object map, used in the drawing thread: it maps a vector
-  // containing the drawing properties of the object to the actual object
-  // mapped.
-  // Drawing properties are what optimize the engine's GPU usage and minimizes
-  // unecessary operations: because the map is ordered via the key, we use the
-  // first element for properties that are shared among large groups of objects
-  // (such as shader ids), the second element for specialized data for that
-  // group (such as vertex array ids) then even more elements for other
-  // specializations (textures and other context sensitive properties). This
-  // makes the insertion and deletion of objects more expensive, but increases
-  // the draw loop efficiency, because we don't need to switch shaders or vertex
-  // arrays (usually expensive calls) back to a previous value in the same
-  // frame.
-  std::map<std::vector<int>, objects::Object *> objects_map;
+  std::set<drawable> drawable_set;
+
+  std::set<Object *> object_set;
 
   // the set of currently pressed keys
   std::set<int> pressed_keys;

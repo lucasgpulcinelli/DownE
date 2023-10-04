@@ -1,9 +1,9 @@
 #ifndef COLORFUL_SPACESHIP_H
 #define COLORFUL_SPACESHIP_H
 
-#include "ColorfulTriangle.h"
+#include "abstracts/ColorfulTriangle.h"
 
-namespace objects {
+namespace engine {
 // class ColorfulSpaceship demonstrates how the object oriented design of the
 // engine is userful in creating actual game objects. It creates a spaceship
 // that can be controlled via the arrow keys by the user. and has physics
@@ -15,11 +15,12 @@ class ColorfulSpaceship : public ColorfulTriangle {
 public:
   ColorfulSpaceship(float x, float y, float scale = 1, float angle = 0)
       : ColorfulTriangle(x, y, scale, angle) {}
-  void draw(int w, int h) override;
+
+  void frame(void) override;
 
 protected:
   float vx = 0, vy = 0;
 };
-} // namespace objects
+} // namespace engine
 
 #endif

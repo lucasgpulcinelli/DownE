@@ -1,9 +1,10 @@
 #ifndef COLORFUL_TRIANGLE_H
 #define COLORFUL_TRIANGLE_H
 
-#include "abstracts/Object.h"
+#include "Object.h"
+#include "Shader.h"
 
-namespace objects {
+namespace engine {
 
 // class ColorfulTriangle demonstrates what a generic object can do using a
 // simple shader with color interpolation.
@@ -14,15 +15,17 @@ public:
   ColorfulTriangle(float x, float y, float scale = 1, float angle = 0);
   ~ColorfulTriangle(void);
 
-  virtual void draw(int w, int h) override;
+  void draw(int texture_id, int vao_id) override;
 
 protected:
   float x, y, scale, angle;
 
 private:
+  static Shader *s;
+  static int shader_id;
   static int count;
   static unsigned int vertex_array_id, vertex_buffer_id;
 };
-} // namespace objects
+} // namespace engine
 
 #endif

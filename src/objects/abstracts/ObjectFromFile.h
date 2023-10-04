@@ -5,7 +5,7 @@
 
 #include <cinttypes>
 
-namespace objects {
+namespace engine {
 // ObjectFromFile is an object that has a mesh in the wavefont obj format
 // related to it. The shader for any object that uses this class as a base is
 // assumed to have a "point" vec3 attribute. ObjectFromFile must be drawn using
@@ -20,8 +20,6 @@ public:
   // the destructor deletes the VAO and VBO for this object if no other objects
   // use such mesh.
   virtual ~ObjectFromFile(void);
-
-  virtual void draw(int w, int h) override;
 
   // getMeshSize gets the mesh size in amount of point coordinates (such that if
   // you divide by 3 you have the amount of verticies, and by 9 you have the
@@ -43,6 +41,6 @@ private:
   // objects that use this mesh, in that order
   static std::map<std::string, std::tuple<uint32_t, uint32_t, int>> mesh_map;
 };
-} // namespace objects
+} // namespace engine
 
 #endif
