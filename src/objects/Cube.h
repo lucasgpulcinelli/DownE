@@ -16,22 +16,53 @@ namespace engine {
 // TODO: flesh out shader and add more capabilities
 class Cube : public Object {
 private:
+  static int id_count;
+
   float angle = 0;
   int shader_id;
-  int mesh_size;
+  std::map<int, std::pair<int, int>> id_index_map;
 
   Shader *s;
   Mesh *m;
 
 public:
   Cube(void) {
+    debug("starting cube creation");
+
     s = new Shader("simple3d");
     m = new Mesh(s, "cube");
 
     this->shader_id = s->getShaderId();
-    this->mesh_size = m->getSize();
 
-    drawables.push_back({shader_id, -1, m->getVAO(), this});
+    auto tex_i = m->getTextureIndicies();
+    debug("cube got " << tex_i.size() << " textures with a total of "
+                      << m->getSize() / 5 << " verticies");
+
+    if (tex_i.size() == 0) {
+      return;
+    }
+
+    int i;
+    for (i = 0; i < (int)tex_i.size() - 1; i++) {
+      id_index_map[id_count] = {tex_i[i].second,
+                                tex_i[i + 1].second - tex_i[i].second};
+
+      drawables.push_back(
+          {shader_id, tex_i[i].first, m->getVAO(), id_count, this});
+      id_count++;
+    }
+
+    id_index_map[id_count] = {tex_i[i].second, m->getSize() - tex_i[i].second};
+    drawables.push_back(
+        {shader_id, tex_i[i].first, m->getVAO(), id_count, this});
+    id_count++;
+
+    debug("done creating cube, ids:");
+    for (auto id_start_count : id_index_map) {
+      debug("id " << id_start_count.first << ", start "
+                  << id_start_count.second.first << ", count "
+                  << id_start_count.second.second);
+    }
   }
 
   ~Cube(void) {
@@ -46,13 +77,20 @@ public:
     }
   }
 
-  void draw(int texture_id, int vao_id) override {
+  void draw(int texture_id, int vao_id, int object_id) override {
+    if (texture_id == -1) {
+      error("invalid texture for cube");
+    }
+
     GLuint loc = glGetUniformLocation(shader_id, "angle");
     glUniform1f(loc, angle);
 
-    glDrawArrays(GL_TRIANGLES, 0, mesh_size / 3);
+    glDrawArrays(GL_TRIANGLES, id_index_map[object_id].first / 5,
+                 id_index_map[object_id].second / 5);
   }
 };
+
+int Cube::id_count = 0;
 } // namespace engine
 
 #endif

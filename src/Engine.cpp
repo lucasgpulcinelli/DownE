@@ -72,6 +72,7 @@ Engine::Engine(void) {
   glDebugMessageCallback(messageCallback, 0);
 
   glEnable(GL_DEPTH_TEST);
+  glActiveTexture(GL_TEXTURE0);
 
   info("engine initalized");
 }
@@ -99,7 +100,7 @@ void Engine::run(void) {
     while (!glfwWindowShouldClose(window)) {
       auto time = glfwGetTime();
 
-      for(auto* obj : object_set){
+      for (auto *obj : object_set) {
         obj->frame();
       }
 
@@ -130,6 +131,7 @@ void Engine::run(void) {
       if (curr_texture != std::get<1>(drawable) &&
           std::get<1>(drawable) != -1) {
         curr_texture = std::get<1>(drawable);
+        glBindTexture(GL_TEXTURE_2D, curr_texture);
       }
 
       if (curr_vao != std::get<2>(drawable)) {
@@ -137,7 +139,7 @@ void Engine::run(void) {
         glBindVertexArray(curr_vao);
       }
 
-      std::get<3>(drawable)->draw(curr_texture, curr_vao);
+      std::get<4>(drawable)->draw(curr_texture, curr_vao, std::get<3>(drawable));
     }
 
     glfwPollEvents();

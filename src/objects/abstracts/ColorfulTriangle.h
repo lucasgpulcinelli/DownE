@@ -15,7 +15,7 @@ public:
   ColorfulTriangle(float x, float y, float scale = 1, float angle = 0);
   ~ColorfulTriangle(void);
 
-  void draw(int texture_id, int vao_id) override;
+  void draw(int texture_id, int vao_id, int object_id) override;
 
 protected:
   float x, y, scale, angle;

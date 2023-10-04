@@ -9,7 +9,7 @@
 namespace engine {
 
 class Object;
-typedef std::tuple<int, int, int, Object*> drawable_t;
+typedef std::tuple<int, int, int, int, Object*> drawable_t;
 
 // class Object represents a thing that can be drawn using the engine, always
 // having a shader associated. It has a shader name as it appears in
@@ -20,7 +20,7 @@ public:
 
   virtual ~Object(void);
 
-  virtual void draw(int texture_id, int vao_id) = 0;
+  virtual void draw(int texture_id, int vao_id, int object_id) = 0;
   virtual void frame(void) = 0;
 
   const std::vector<drawable_t> &

@@ -14,7 +14,7 @@ extern "C" {
 namespace engine {
 
 class Object;
-typedef std::tuple<int, int, int, Object*> drawable;
+typedef std::tuple<int, int, int, int, Object*> drawable;
 
 // class Engine defines the main game manager as a singleton. When constructed,
 // a GLFW window is opened where all the game actions happen. It manages both
