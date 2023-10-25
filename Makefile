@@ -1,5 +1,5 @@
-CXXFLAGS  += -Wall -Wextra -Wpedantic -Iinclude
-LDFLAGS   += -lglfw -lGL -lGLEW
+CXXFLAGS  += -Wall -Wextra -Wpedantic -Iinclude -std=c++17
+LDFLAGS   += -lglfw -lGL -lGLEW -lpthread
 
 EXECUTABLE ?= build/main
 ZIPFILE    ?= ../zipfile.zip
@@ -23,7 +23,7 @@ debug: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OFILES)
 	@mkdir -p build
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX)  -o $@ $^ $(LDFLAGS)
 
 build/obj/%.o: src/%.cpp src/%.h
 	@mkdir -p $(shell echo $< |sed 's|src\(.*\)/[^/]*|build/obj\1|')
