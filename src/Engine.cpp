@@ -109,12 +109,10 @@ void Engine::run(void) {
         obj->frame();
       }
 
-      // framerate cap at the monitor refresh rate
-      // TODO: this should be configurable
       auto delta = glfwGetTime() - time;
       if (delta < 1.0f / refresh_rate) {
         std::this_thread::sleep_for(
-            std::chrono::duration<double>(1.0f / refresh_rate - delta));
+            std::chrono::duration<double>(1.0f / 30 - delta));
       }
     }
   });
