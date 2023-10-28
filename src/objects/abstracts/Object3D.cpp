@@ -40,6 +40,7 @@ Object3D::Object3D(std::string shader_name, std::string mesh_name) {
   drawables.push_back({shader_id, tex_i[i].first, m->getVAO(), id_count, this});
   id_count++;
 
+
   debug("done creating 3d object, ids:");
   for (auto id_start_count : id_index_map) {
     debug("id " << id_start_count.first << ", start "

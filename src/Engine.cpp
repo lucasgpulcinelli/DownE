@@ -74,6 +74,11 @@ Engine::Engine(void) {
   glEnable(GL_DEPTH_TEST);
   glActiveTexture(GL_TEXTURE0);
 
+  glDisable(GL_CULL_FACE);
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   info("engine initalized");
 }
 
@@ -139,7 +144,8 @@ void Engine::run(void) {
         glBindVertexArray(curr_vao);
       }
 
-      std::get<4>(drawable)->draw(curr_texture, curr_vao, std::get<3>(drawable));
+      std::get<4>(drawable)->draw(curr_texture, curr_vao,
+                                  std::get<3>(drawable));
     }
 
     glfwPollEvents();

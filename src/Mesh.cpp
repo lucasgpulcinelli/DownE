@@ -153,7 +153,8 @@ int loadTexture(std::string texture_file) {
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+  glTexImage2D(GL_TEXTURE_2D, 0, (nr_channels == 3) ? GL_RGB : GL_RGBA, width,
+               height, 0, (nr_channels == 3) ? GL_RGB : GL_RGBA,
                GL_UNSIGNED_BYTE, data);
 
   glGenerateMipmap(GL_TEXTURE_2D);
@@ -180,7 +181,7 @@ loadMesh(int shader_id, std::string name,
   for (auto tex_i : points_texindicies.second) {
     auto texture_file = texture_file_map[tex_i.first];
     if (texture_id_map.find(texture_file) != texture_id_map.end()) {
-      auto &texid_count = texture_id_map[tex_i.first];
+      auto &texid_count = texture_id_map[texture_file];
       texid_count.second++;
       texture_indicies.push_back({texid_count.first, tex_i.second});
       continue;
