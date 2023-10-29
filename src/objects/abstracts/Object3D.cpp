@@ -40,7 +40,6 @@ Object3D::Object3D(std::string shader_name, std::string mesh_name) {
   drawables.push_back({shader_id, tex_i[i].first, m->getVAO(), id_count, this});
   id_count++;
 
-
   debug("done creating 3d object, ids:");
   for (auto id_start_count : id_index_map) {
     debug("id " << id_start_count.first << ", start "
@@ -62,7 +61,17 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
   GLuint loc = glGetUniformLocation(shader_id, "angle");
   glUniform1f(loc, angles[0]);
 
-  glDrawArrays(draw_triangles ? GL_TRIANGLES : GL_LINES,
-               id_index_map[object_id].first / 5,
-               id_index_map[object_id].second / 5);
+  if (draw_triangles) {
+    glDrawArrays(GL_TRIANGLES, id_index_map[object_id].first / 5,
+                 id_index_map[object_id].second / 5);
+    return;
+  }
+
+  for (int i = id_index_map[object_id].first / 5;
+       i <
+       id_index_map[object_id].first / 5 + id_index_map[object_id].second / 5;
+       i += 3) {
+
+    glDrawArrays(GL_LINE_LOOP, i, 3);
+  }
 }

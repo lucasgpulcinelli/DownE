@@ -23,6 +23,10 @@ void Object3DWithMovement::frame(void) {
     this->skip_draw = false;
   }
 
+  if (skip_draw) {
+    return;
+  }
+
   if (keys.find(GLFW_KEY_LEFT) != keys.end()) {
     angles[0] -= 0.05;
   }
