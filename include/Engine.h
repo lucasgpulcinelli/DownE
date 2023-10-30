@@ -14,7 +14,14 @@ extern "C" {
 namespace engine {
 
 class Object;
-typedef std::tuple<int, int, int, int, Object*> drawable;
+
+// type drawable defines the entry type for the drawable_set in the engine:
+// all drawables have one and only one shader, texture, VAO and an internal id,
+// as well as a parent object that owns it.
+// This is done that way in order to minimize shader and texture switches.
+// The parent object is responsible for implementing the uniform setting and
+// glDrawArrays calling.
+typedef std::tuple<int, int, int, int, Object *> drawable;
 
 // class Engine defines the main game manager as a singleton. When constructed,
 // a GLFW window is opened where all the game actions happen. It manages both
@@ -62,8 +69,11 @@ private:
   // the monitor refresh rate, used in the drawing loop
   int refresh_rate;
 
+  // the set of all drawables that should be drawn, ordered by the properties
+  // described in the drawable type
   std::set<drawable> drawable_set;
 
+  // the set of all objects currently managed by the engine
   std::set<Object *> object_set;
 
   // the set of currently pressed keys

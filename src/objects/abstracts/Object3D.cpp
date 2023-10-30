@@ -26,6 +26,7 @@ Object3D::Object3D(std::string shader_name, std::string mesh_name) {
     return;
   }
 
+  // for each texture, prepare the id_index_map for use in the draw method.
   int i;
   for (i = 0; i < (int)tex_i.size() - 1; i++) {
     id_index_map[id_count] = {tex_i[i].second,
@@ -36,6 +37,7 @@ Object3D::Object3D(std::string shader_name, std::string mesh_name) {
     id_count++;
   }
 
+  // make sure we draw until the end of the object.
   id_index_map[id_count] = {tex_i[i].second, m->getSize() - tex_i[i].second};
   drawables.push_back({shader_id, tex_i[i].first, m->getVAO(), id_count, this});
   id_count++;

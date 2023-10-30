@@ -16,12 +16,17 @@ extern "C" {
 using namespace engine;
 
 namespace {
+
+// storeFace scans a single line in a wavefront file (in stream) where the first
+// chacter is a face (already read at this point) and adds the coordinates and
+// texture indicies to tries, reading from verticies and textures to do that.
 void storeFace(std::vector<float> &tris, std::vector<float> &verticies,
                std::vector<float> &textures, std::istringstream &stream) {
   std::vector<std::pair<int, int>> tri_indicies;
   int vi, vti, vni;
   std::string word;
 
+  // read each num/num/num tuple
   while (stream >> word) {
     // we do not support %d//%d
     int read = std::sscanf(word.c_str(), "%d/%d/%d", &vi, &vti, &vni);
@@ -35,6 +40,8 @@ void storeFace(std::vector<float> &tris, std::vector<float> &verticies,
     tri_indicies.push_back({vi - 1, vti - 1});
   }
 
+  // for each tuple, make a triangle such that the whole line equates to a
+  // polygon
   for (int i = 1; i < (int)tri_indicies.size() - 1; i++) {
     for (int j = 0; j < 3; j++) {
       tris.push_back(verticies[tri_indicies[0].first * 3 + j]);
@@ -57,8 +64,8 @@ void storeFace(std::vector<float> &tris, std::vector<float> &verticies,
 }
 
 // readMeshTris reads all tris in a file in the wavefont obj format and return a
-// vector of vertex coordinates of the object, ordered for use with glDrawArrays
-// in the GL_TRIANGLES mode.
+// vector of vertex coordinates and texels and all material name and indicies of
+// the object, ordered for use with glDrawArrays in the GL_TRIANGLES mode.
 std::pair<std::vector<float>, std::vector<std::pair<std::string, int>>>
 readMeshTris(std::string mesh_path) {
   debug("start mesh reading for " << mesh_path);
@@ -67,8 +74,9 @@ readMeshTris(std::string mesh_path) {
   std::vector<float> verticies;
   std::vector<float> textures;
   std::vector<float> tris;
-  std::vector<std::pair<std::string, int>> texture_indicies;
+  std::vector<std::pair<std::string, int>> material_indicies;
 
+  // for each line
   std::string line;
   while (std::getline(f, line)) {
     std::istringstream stream(line);
@@ -76,24 +84,31 @@ readMeshTris(std::string mesh_path) {
     std::string s;
     stream >> s;
     if (s == "v") {
+      // read a vertex into the verticies array
+
       float x, y, z;
       stream >> x >> y >> z;
       verticies.push_back(x);
       verticies.push_back(y);
       verticies.push_back(z);
     } else if (s == "usemtl") {
+      // read the material name and store it
+
       std::string texture_name;
       stream >> texture_name;
 
       debug("changed mtl to " << texture_name << " at vertex "
                               << tris.size() / 5);
-      texture_indicies.push_back({texture_name, tris.size()});
+      material_indicies.push_back({texture_name, tris.size()});
     } else if (s == "vt") {
+      // read the texel coordinates and store it in the textures array
+
       float u, v;
       stream >> u >> v;
       textures.push_back(u);
       textures.push_back(v);
     } else if (s == "f") {
+      // read the face indicies and store them in the final tries array
       storeFace(tris, verticies, textures, stream);
     }
   }
@@ -103,9 +118,11 @@ readMeshTris(std::string mesh_path) {
   debug("done reading mesh, got " << tris.size() / 5 << " verticies and "
                                   << texture_indicies.size() << " textures");
 
-  return {tris, texture_indicies};
+  return {tris, material_indicies};
 }
 
+// readMaterialFile reads a mtl file and returns all important properties: the
+// map from material names to texture filenames
 std::map<std::string, std::string> readMaterialFile(std::string mtl_file) {
   std::fstream f(mtl_file, std::ios_base::in);
 
@@ -131,6 +148,7 @@ std::map<std::string, std::string> readMaterialFile(std::string mtl_file) {
   return out;
 }
 
+// loadTexture creates a new opengl texture from a file and returns its id
 int loadTexture(std::string texture_file) {
   int width, height, nr_channels;
   uint8_t *data =
@@ -164,47 +182,60 @@ int loadTexture(std::string texture_file) {
   return texture;
 }
 
+// loadMesh creates a whole new mesh from a mesh name, using a certain
+// shader and having a texture map for reusing textures between meshes.
 std::tuple<int, int, int, std::vector<std::pair<int, int>>>
 loadMesh(int shader_id, std::string name,
          std::map<std::string, std::pair<int, int>> &texture_id_map) {
   uint32_t vao, vbo;
 
+  // read the verticies and material indicies
   const std::string mesh_path = "res/meshes/" + name + "/mesh.obj";
-  auto points_texindicies = readMeshTris(mesh_path);
+  auto points_matindicies = readMeshTris(mesh_path);
 
+  // read the material file to get the map
   const std::string mtl_path = "res/meshes/" + name + "/mesh.mtl";
   auto texture_file_map = readMaterialFile(mtl_path);
 
-  auto points = points_texindicies.first;
+  auto points = points_matindicies.first;
   std::vector<std::pair<int, int>> texture_indicies;
 
-  for (auto tex_i : points_texindicies.second) {
-    auto texture_file = texture_file_map[tex_i.first];
+  // for each material, add a texture index entry
+  for (auto mat_i : points_matindicies.second) {
+    auto texture_file = texture_file_map[mat_i.first];
+
+    // if it was already loaded before, reuse the entry
     if (texture_id_map.find(texture_file) != texture_id_map.end()) {
       auto &texid_count = texture_id_map[texture_file];
       texid_count.second++;
-      texture_indicies.push_back({texid_count.first, tex_i.second});
+      texture_indicies.push_back({texid_count.first, mat_i.second});
       continue;
     }
 
     debug("loading texture at " << texture_file);
 
+    // it not, load the texture from the file and add it to the map for reuse
     const std::string texture_path = "res/textures/" + texture_file;
     auto texture_id = loadTexture(texture_path);
     texture_id_map[texture_file] = {texture_id, 1};
-    texture_indicies.push_back({texture_id, tex_i.second});
+    texture_indicies.push_back({texture_id, mat_i.second});
   }
 
   int size = points.size();
 
+  // create the vbo
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+  // set the vbo with the data
   glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), points.data(),
                GL_STATIC_DRAW);
 
+  // create the vao
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
+
+  // set the vertex coordinates and texels with the correct data from the vbo
 
   GLint loc = glGetAttribLocation(shader_id, "point");
   glEnableVertexAttribArray(loc);
@@ -266,6 +297,8 @@ Mesh::~Mesh() {
   if (std::get<4>(t)-- != 1) {
     return;
   }
+
+  //TODO: delete textures and other opengl objects
 
   glDeleteVertexArrays(1, (uint32_t *)&std::get<0>(t));
   glDeleteBuffers(1, (uint32_t *)&std::get<1>(t));

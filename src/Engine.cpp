@@ -110,7 +110,7 @@ void Engine::run(void) {
       }
 
       auto delta = glfwGetTime() - time;
-      if (delta < 1.0f / refresh_rate) {
+      if (delta < 1.0f / 30) {
         std::this_thread::sleep_for(
             std::chrono::duration<double>(1.0f / 30 - delta));
       }

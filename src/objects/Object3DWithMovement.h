@@ -10,6 +10,9 @@ extern "C" {
 
 namespace engine {
 
+// class Object3DWithMovement implements an object that should be activated with
+// a certain key (which deactivate all others), and is controlled via wasd,
+// arrow keys, and some other functionalities.
 class Object3DWithMovement : public Object3D {
 private:
   int activator;
