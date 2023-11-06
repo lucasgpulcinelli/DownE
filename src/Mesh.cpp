@@ -106,7 +106,7 @@ readMeshTris(std::string mesh_path) {
       float u, v;
       stream >> u >> v;
       textures.push_back(u);
-      textures.push_back(v);
+      textures.push_back(1-v);
     } else if (s == "f") {
       // read the face indicies and store them in the final tries array
       storeFace(tris, verticies, textures, stream);
