@@ -13,6 +13,10 @@ Object3DWithMovement::Object3DWithMovement(std::string mesh_name, int activator)
   this->activator = activator;
   objs.insert(this);
 
+  auto w_h = Engine::getEngine()->getWindowSize();
+  ar = float(w_h.second) / w_h.first;
+  scales[0] = ar;
+
   changed_mesh_time = std::chrono::high_resolution_clock::now();
 }
 
@@ -62,22 +66,22 @@ void Object3DWithMovement::frame(void) {
   }
 
   if (keys.find(GLFW_KEY_Z) != keys.end()) {
-    scales[0] += 0.01;
+    scales[0] += 0.01*ar;
     scales[1] += 0.01;
     scales[2] += 0.01;
     if (!boundBoxOk()) {
-      scales[0] -= 0.01;
+      scales[0] -= 0.01*ar;
       scales[1] -= 0.01;
       scales[2] -= 0.01;
     }
   }
 
   if (keys.find(GLFW_KEY_X) != keys.end()) {
-    scales[0] -= 0.01;
+    scales[0] -= 0.01*ar;
     scales[1] -= 0.01;
     scales[2] -= 0.01;
     if (!boundBoxOk()) {
-      scales[0] += 0.01;
+      scales[0] += 0.01*ar;
       scales[1] += 0.01;
       scales[2] += 0.01;
     }

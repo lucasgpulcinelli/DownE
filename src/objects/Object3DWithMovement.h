@@ -21,6 +21,7 @@ private:
   static std::set<Object3DWithMovement *> objs;
   int textures_filter = GL_LINEAR;
   std::chrono::time_point<std::chrono::high_resolution_clock> changed_mesh_time;
+  float ar;
 
   bool boundBoxOk(void);
 
