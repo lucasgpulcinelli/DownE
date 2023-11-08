@@ -61,7 +61,13 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
   }
 
   GLuint loc = glGetUniformLocation(shader_id, "angle");
-  glUniform1f(loc, angles[0]);
+  glUniform3f(loc, angles[0], angles[1], angles[2]);
+
+  loc = glGetUniformLocation(shader_id, "scale");
+  glUniform3f(loc, scales[0], scales[1], scales[2]);
+
+  loc = glGetUniformLocation(shader_id, "position");
+  glUniform3f(loc, position[0], position[1], position[2]);
 
   if (draw_triangles) {
     glDrawArrays(GL_TRIANGLES, id_index_map[object_id].first / 5,
