@@ -2,6 +2,7 @@
 
 #include "Engine.h"
 
+#include <chrono>
 #include <set>
 
 extern "C" {
@@ -18,6 +19,8 @@ private:
   int activator;
   bool skip_draw = true;
   static std::set<Object3DWithMovement *> objs;
+  int textures_filter = GL_LINEAR;
+  std::chrono::time_point<std::chrono::high_resolution_clock> changed_mesh_time;
 
 public:
   Object3DWithMovement(std::string mesh_name, int activator);

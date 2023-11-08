@@ -20,12 +20,13 @@ private:
   std::map<int, std::pair<int, int>> id_index_map;
 
   Shader *s;
-  Mesh *m;
 
 protected:
+  Mesh *m;
+
   float angles[3] = {0, 0, 0};
   float position[3] = {0, 0, 0};
-  float scale;
+  float scales[3] = {1, 1, 1};
 
   // if the object should be drawn as triangles or lines. Note that drawing
   // lines is less efficient because of the Mesh VAO layout.

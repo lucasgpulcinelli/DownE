@@ -116,7 +116,7 @@ readMeshTris(std::string mesh_path) {
   f.close();
 
   debug("done reading mesh, got " << tris.size() / 5 << " verticies and "
-                                  << texture_indicies.size() << " textures");
+                                  << material_indicies.size() << " materials");
 
   return {tris, material_indicies};
 }
