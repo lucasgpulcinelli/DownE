@@ -2,6 +2,7 @@
 #include "utils.h"
 
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <vector>
 
@@ -106,7 +107,7 @@ readMeshTris(std::string mesh_path) {
       float u, v;
       stream >> u >> v;
       textures.push_back(u);
-      textures.push_back(1-v);
+      textures.push_back(1 - v);
     } else if (s == "f") {
       // read the face indicies and store them in the final tries array
       storeFace(tris, verticies, textures, stream);
@@ -184,7 +185,10 @@ int loadTexture(std::string texture_file) {
 
 // loadMesh creates a whole new mesh from a mesh name, using a certain
 // shader and having a texture map for reusing textures between meshes.
-std::tuple<int, int, int, std::vector<std::pair<int, int>>>
+// the method returns the newly created VAO and VBO, the mesh size, the
+// relation between textures and verticies indicies, and the bounding box for
+// the object.
+std::tuple<int, int, int, std::vector<std::pair<int, int>>, std::vector<float>>
 loadMesh(int shader_id, std::string name,
          std::map<std::string, std::pair<int, int>> &texture_id_map) {
   uint32_t vao, vbo;
@@ -223,6 +227,22 @@ loadMesh(int shader_id, std::string name,
 
   int size = points.size();
 
+  // calculate the bounding box, first the min 3 coordinates then the max 3
+  // coordinates
+  auto bbox = std::vector<float>(6, std::numeric_limits<float>::max());
+  bbox[3] = 0;
+  bbox[4] = 0;
+  bbox[5] = 0;
+
+  for (int i = 0; i < size; i += 5) {
+    bbox[0] = std::min(bbox[0], points[i]);
+    bbox[1] = std::min(bbox[1], points[i + 1]);
+    bbox[2] = std::min(bbox[2], points[i + 2]);
+    bbox[3] = std::max(bbox[3], points[i]);
+    bbox[4] = std::max(bbox[4], points[i + 1]);
+    bbox[5] = std::max(bbox[5], points[i + 2]);
+  }
+
   // create the vbo
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -246,13 +266,14 @@ loadMesh(int shader_id, std::string name,
   glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                         (void *)(sizeof(float) * 3));
 
-  return {vao, vbo, size, texture_indicies};
+  return {vao, vbo, size, texture_indicies, bbox};
 }
 } // namespace
 
 // vao, vbo, mesh size, texture indicies and starting vertex, and count
 std::map<std::string,
-         std::tuple<int, int, int, std::vector<std::pair<int, int>>, int>>
+         std::tuple<int, int, int, std::vector<std::pair<int, int>>,
+                    std::vector<float>, int>>
     Mesh::mesh_map;
 
 // texture id and count
@@ -268,7 +289,8 @@ Mesh::Mesh(Shader *s, std::string name) {
     vbo = std::get<1>(t);
     size = std::get<2>(t);
     texture_indicies = std::get<3>(t);
-    std::get<4>(t)++;
+    bounding_box = std::get<4>(t);
+    std::get<5>(t)++;
     return;
   }
 
@@ -279,8 +301,9 @@ Mesh::Mesh(Shader *s, std::string name) {
   vbo = std::get<1>(properties);
   size = std::get<2>(properties);
   texture_indicies = std::get<3>(properties);
+  bounding_box = std::get<4>(properties);
 
-  mesh_map[name] = {vao, vbo, size, texture_indicies, 1};
+  mesh_map[name] = {vao, vbo, size, texture_indicies, bounding_box, 1};
 }
 
 int Mesh::getVAO(void) { return vao; }
@@ -294,11 +317,11 @@ int Mesh::getSize(void) { return size; }
 Mesh::~Mesh() {
   auto &t = mesh_map[name];
 
-  if (std::get<4>(t)-- != 1) {
+  if (std::get<5>(t)-- != 1) {
     return;
   }
 
-  //TODO: delete textures and other opengl objects
+  // TODO: delete textures and other opengl objects
 
   glDeleteVertexArrays(1, (uint32_t *)&std::get<0>(t));
   glDeleteBuffers(1, (uint32_t *)&std::get<1>(t));
@@ -307,3 +330,5 @@ Mesh::~Mesh() {
 
   mesh_map.erase(name);
 }
+
+const std::vector<float> &Mesh::getBoundingBox(void) { return bounding_box; }

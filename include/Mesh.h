@@ -36,11 +36,14 @@ public:
   // vertex that should have this texture applied.
   const std::vector<std::pair<int, int>> &getTextureIndicies(void);
 
+  const std::vector<float> &getBoundingBox(void);
+
 private:
   std::string name;
   int vao, vbo;
   int size;
   std::vector<std::pair<int, int>> texture_indicies;
+  std::vector<float> bounding_box;
 
   // the texture_id map, mapping texture names (a file in res/textures/) to its
   // id and count of instances.
@@ -48,9 +51,9 @@ private:
 
   // the mesh map, mapping a mesh name to its properties: vao, vbo, size in
   // coordinates, texture_indicies vector, and count of instances.
-  static std::map<
-      std::string,
-      std::tuple<int, int, int, std::vector<std::pair<int, int>>, int>>
+  static std::map<std::string,
+                  std::tuple<int, int, int, std::vector<std::pair<int, int>>,
+                             std::vector<float>, int>>
       mesh_map;
 };
 } // namespace engine

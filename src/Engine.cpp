@@ -57,8 +57,7 @@ Engine::Engine(void) {
   this->refresh_rate = mode->refreshRate;
 
   debug("creating window");
-  window = glfwCreateWindow(mode->width, mode->height, "main engine", nullptr,
-                            nullptr);
+  window = glfwCreateWindow(1000, 1000, "main engine", nullptr, nullptr);
 
   glfwMakeContextCurrent(window);
 

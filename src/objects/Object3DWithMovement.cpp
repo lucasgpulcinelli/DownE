@@ -1,3 +1,5 @@
+#include <eigen3/Eigen/Dense>
+
 #include "Object3DWithMovement.h"
 
 #include "utils.h"
@@ -33,43 +35,77 @@ void Object3DWithMovement::frame(void) {
 
   if (keys.find(GLFW_KEY_LEFT) != keys.end()) {
     angles[1] -= 0.05;
+    if (!boundBoxOk()) {
+      angles[1] += 0.05;
+    }
   }
 
   if (keys.find(GLFW_KEY_RIGHT) != keys.end()) {
     angles[1] += 0.05;
+    if (!boundBoxOk()) {
+      angles[1] -= 0.05;
+    }
   }
 
   if (keys.find(GLFW_KEY_UP) != keys.end()) {
     angles[0] += 0.05;
+    if (!boundBoxOk()) {
+      angles[0] -= 0.05;
+    }
   }
 
   if (keys.find(GLFW_KEY_DOWN) != keys.end()) {
     angles[0] -= 0.05;
+    if (!boundBoxOk()) {
+      angles[0] += 0.05;
+    }
   }
 
   if (keys.find(GLFW_KEY_Z) != keys.end()) {
     scales[0] += 0.01;
     scales[1] += 0.01;
     scales[2] += 0.01;
+    if (!boundBoxOk()) {
+      scales[0] -= 0.01;
+      scales[1] -= 0.01;
+      scales[2] -= 0.01;
+    }
   }
 
   if (keys.find(GLFW_KEY_X) != keys.end()) {
     scales[0] -= 0.01;
     scales[1] -= 0.01;
     scales[2] -= 0.01;
+    if (!boundBoxOk()) {
+      scales[0] += 0.01;
+      scales[1] += 0.01;
+      scales[2] += 0.01;
+    }
   }
 
   if (keys.find(GLFW_KEY_W) != keys.end()) {
     position[1] += 0.05;
+    if (!boundBoxOk()) {
+      position[1] -= 0.05;
+    }
   }
   if (keys.find(GLFW_KEY_A) != keys.end()) {
     position[0] -= 0.05;
+    if (!boundBoxOk()) {
+      position[0] += 0.05;
+    }
   }
   if (keys.find(GLFW_KEY_S) != keys.end()) {
     position[1] -= 0.05;
+    if (!boundBoxOk()) {
+      position[1] += 0.05;
+    }
   }
   if (keys.find(GLFW_KEY_D) != keys.end()) {
     position[0] += 0.05;
+    if (!boundBoxOk()) {
+      position[0] -= 0.05;
+    }
   }
 
   if (keys.find(GLFW_KEY_P) != keys.end()) {
@@ -83,6 +119,65 @@ void Object3DWithMovement::frame(void) {
 
     draw_triangles = !draw_triangles;
   }
+}
+
+bool Object3DWithMovement::boundBoxOk(void) {
+  Eigen::Matrix4f tr_s =
+      (Eigen::Matrix4f() << scales[0], 0, 0, position[0], 0, scales[1], 0,
+       position[1], 0, 0, scales[2], position[2], 0, 0, 0, 1)
+          .finished();
+
+  Eigen::Matrix4f rx =
+      (Eigen::Matrix4f() << 1, 0, 0, 0, 0, cos(angles[0]), -sin(angles[0]), 0,
+       0, sin(angles[0]), cos(angles[0]), 0, 0, 0, 0, 1)
+          .finished();
+
+  Eigen::Matrix4f ry =
+      (Eigen::Matrix4f() << cos(angles[1]), 0, -sin(angles[1]), 0, 0, 1, 0, 0,
+       sin(angles[1]), 0, cos(angles[1]), 0, 0, 0, 0, 1)
+          .finished();
+
+  auto bbox = m->getBoundingBox();
+
+  // use i as a bit mask: if the bit is zero, use the minimum coordinate, else
+  // use the maximum coordinate
+  for (int i = 0; i < 8; i++) {
+    float x, y, z;
+    if (i & 0b001) {
+      x = bbox[0];
+    } else {
+      x = bbox[3];
+    }
+
+    if (i & 0b010) {
+      y = bbox[1];
+    } else {
+      y = bbox[4];
+    }
+
+    if (i & 0b100) {
+      z = bbox[2];
+    } else {
+      z = bbox[5];
+    }
+
+    Eigen::Vector4f in_point(x, y, z, 1);
+    Eigen::Vector4f out_point = tr_s * ry * rx * in_point;
+
+    if (out_point.x() < -1 || out_point.x() > 1) {
+      return false;
+    }
+
+    if (out_point.y() < -1 || out_point.y() > 1) {
+      return false;
+    }
+
+    if (out_point.z() < -1 || out_point.z() > 1) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 void Object3DWithMovement::draw(int texture_id, int vao_id, int object_id) {
@@ -106,7 +201,7 @@ void Object3DWithMovement::draw(int texture_id, int vao_id, int object_id) {
 
     changed_mesh_time = time_now;
 
-    textures_filter = (textures_filter == GL_LINEAR)? GL_NEAREST : GL_LINEAR;
+    textures_filter = (textures_filter == GL_LINEAR) ? GL_NEAREST : GL_LINEAR;
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textures_filter);
   }
 }
