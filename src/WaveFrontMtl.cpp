@@ -20,13 +20,19 @@ WaveFrontMtl::WaveFrontMtl(std::string file) {
   }
 
   while (!f.eof()) {
-    materials.push_back(Material(f));
+    materials.push_back(new Material(f));
   }
 }
 
-const Material &WaveFrontMtl::getMaterial(std::string name) const {
-  for (auto &m : materials) {
-    if (m.getName() == name) {
+WaveFrontMtl::~WaveFrontMtl(void) {
+  for (auto *m : materials) {
+    delete m;
+  }
+}
+
+const Material *WaveFrontMtl::getMaterial(std::string name) const {
+  for (auto *m : materials) {
+    if (m->getName() == name) {
       return m;
     }
   }

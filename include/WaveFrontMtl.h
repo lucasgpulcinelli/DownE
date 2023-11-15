@@ -10,11 +10,13 @@ namespace engine {
 
 class WaveFrontMtl {
 private:
-  std::vector<Material> materials;
+  std::vector<Material *> materials;
 
 public:
   WaveFrontMtl(std::string file);
-  const Material &getMaterial(std::string name) const;
+  ~WaveFrontMtl(void);
+
+  const Material *getMaterial(std::string name) const;
 };
 
 } // namespace engine

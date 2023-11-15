@@ -1,5 +1,7 @@
 #include "Material.h"
 
+#include "Texture.h"
+
 #include <fstream>
 #include <map>
 #include <sstream>
@@ -7,10 +9,11 @@
 
 using namespace engine;
 
-// readMaterialFile reads a mtl file and returns all important properties: the
+// readMaterialFile reads a mtl file and sets all important properties: the
 // map from material names to texture filenames
 Material::Material(std::fstream &f) {
   std::string s;
+  std::string texture_file;
 
   f >> name;
 
@@ -22,8 +25,12 @@ Material::Material(std::fstream &f) {
       f >> texture_file;
     }
   };
+
+  texture = new Texture(texture_file);
 }
+
+Material::~Material(void) { delete texture; }
 
 std::string Material::getName(void) const { return name; }
 
-std::string Material::getTextureFile(void) const { return texture_file; }
+const Texture *Material::getTexture(void) const { return texture; }

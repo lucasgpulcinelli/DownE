@@ -10,108 +10,46 @@
 
 extern "C" {
 #include <GL/glew.h>
-
-#define STBI_NO_FAILURE_STRINGS
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 }
 
 using namespace engine;
 
-namespace {
-
-// loadTexture creates a new opengl texture from a file and returns its id
-int loadTexture(std::string texture_file) {
-  int width, height, nr_channels;
-  uint8_t *data =
-      stbi_load(texture_file.c_str(), &width, &height, &nr_channels, 0);
-
-  debug("data has " << nr_channels << " channels");
-  if (data == nullptr) {
-    error(texture_file << " returned null when tring to read");
-  }
-
-  uint32_t texture;
-
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, (nr_channels == 3) ? GL_RGB : GL_RGBA, width,
-               height, 0, (nr_channels == 3) ? GL_RGB : GL_RGBA,
-               GL_UNSIGNED_BYTE, data);
-
-  glGenerateMipmap(GL_TEXTURE_2D);
-
-  stbi_image_free(data);
-
-  return texture;
-}
-
 // loadMesh creates a whole new mesh from a mesh name, using a certain
-// shader and having a texture map for reusing textures between meshes.
-// the method returns the newly created VAO and VBO, the mesh size, the
-// relation between textures and verticies indicies, and the bounding box for
-// the object.
-std::tuple<int, int, int, std::vector<std::pair<int, int>>, std::vector<float>>
-loadMesh(int shader_id, std::string name,
-         std::map<std::string, std::pair<int, int>> &texture_id_map) {
-  uint32_t vao, vbo;
-
+// shader.
+// the method sets VAO and VBO ids, the mesh size, the relation between 
+// textures and verticies indicies, and the bounding box for the object.
+void Mesh::loadMesh(int shader_id) {
   const std::string mesh_path = "res/meshes/" + name + "/mesh.obj";
   WaveFrontObj wfo(mesh_path);
 
-  // read the material file to get the map
   const std::string mtl_path = "res/meshes/" + name + "/mesh.mtl";
-  WaveFrontMtl wfmtl(mtl_path);
-
-  auto points = wfo.getTris();
-  std::vector<std::pair<int, int>> texture_indicies;
+  wfmtl = new WaveFrontMtl(mtl_path);
 
   // for each material, add a texture index entry
   for (auto mat_i : wfo.getMaterialIndicies()) {
-    const Material &m = wfmtl.getMaterial(mat_i.first);
-    const std::string texture_file = m.getTextureFile();
+    const Material *m = wfmtl->getMaterial(mat_i.first);
+    const Texture *texture = m->getTexture();
 
-    // if it was already loaded before, reuse the entry
-    if (texture_id_map.find(texture_file) != texture_id_map.end()) {
-      auto &texid_count = texture_id_map[texture_file];
-      texid_count.second++;
-      texture_indicies.push_back({texid_count.first, mat_i.second});
-      continue;
-    }
-
-    debug("loading texture at " << texture_file);
-
-    // it not, load the texture from the file and add it to the map for reuse
-    const std::string texture_path = "res/textures/" + texture_file;
-    auto texture_id = loadTexture(texture_path);
-    texture_id_map[texture_file] = {texture_id, 1};
-    texture_indicies.push_back({texture_id, mat_i.second});
+    texture_indicies.push_back({texture->getId(), mat_i.second});
   }
 
-  int size = points.size();
+  auto points = wfo.getTris();
+  size = points.size();
 
   // calculate the bounding box, first the min 3 coordinates then the max 3
   // coordinates
-  auto bbox = std::vector<float>(6, std::numeric_limits<float>::max());
-  bbox[3] = 0;
-  bbox[4] = 0;
-  bbox[5] = 0;
+  bounding_box = std::vector<float>(6, std::numeric_limits<float>::max());
+  bounding_box[3] = 0;
+  bounding_box[4] = 0;
+  bounding_box[5] = 0;
 
   for (int i = 0; i < size; i += 5) {
-    bbox[0] = std::min(bbox[0], points[i]);
-    bbox[1] = std::min(bbox[1], points[i + 1]);
-    bbox[2] = std::min(bbox[2], points[i + 2]);
-    bbox[3] = std::max(bbox[3], points[i]);
-    bbox[4] = std::max(bbox[4], points[i + 1]);
-    bbox[5] = std::max(bbox[5], points[i + 2]);
+    bounding_box[0] = std::min(bounding_box[0], points[i]);
+    bounding_box[1] = std::min(bounding_box[1], points[i + 1]);
+    bounding_box[2] = std::min(bounding_box[2], points[i + 2]);
+    bounding_box[3] = std::max(bounding_box[3], points[i]);
+    bounding_box[4] = std::max(bounding_box[4], points[i + 1]);
+    bounding_box[5] = std::max(bounding_box[5], points[i + 2]);
   }
 
   // create the vbo
@@ -136,19 +74,13 @@ loadMesh(int shader_id, std::string name,
   glEnableVertexAttribArray(loc);
   glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
                         (void *)(sizeof(float) * 3));
-
-  return {vao, vbo, size, texture_indicies, bbox};
 }
-} // namespace
 
 // vao, vbo, mesh size, texture indicies and starting vertex, and count
 std::map<std::string,
          std::tuple<int, int, int, std::vector<std::pair<int, int>>,
                     std::vector<float>, int>>
     Mesh::mesh_map;
-
-// texture id and count
-std::map<std::string, std::pair<int, int>> Mesh::texture_id_map;
 
 Mesh::Mesh(Shader *s, std::string name) {
   debug("creating mesh for " << name);
@@ -167,17 +99,12 @@ Mesh::Mesh(Shader *s, std::string name) {
 
   debug("mesh " << name << " will be loaded");
 
-  auto properties = loadMesh(s->getShaderId(), name, texture_id_map);
-  vao = std::get<0>(properties);
-  vbo = std::get<1>(properties);
-  size = std::get<2>(properties);
-  texture_indicies = std::get<3>(properties);
-  bounding_box = std::get<4>(properties);
+  loadMesh(s->getShaderId());
 
   mesh_map[name] = {vao, vbo, size, texture_indicies, bounding_box, 1};
 }
 
-int Mesh::getVAO(void) { return vao; }
+uint32_t Mesh::getVAO(void) { return vao; }
 
 const std::vector<std::pair<int, int>> &Mesh::getTextureIndicies(void) {
   return texture_indicies;
@@ -192,12 +119,12 @@ Mesh::~Mesh() {
     return;
   }
 
-  // TODO: delete textures and other opengl objects
+  debug("mesh " << name << " will be deleted");
+
+  delete wfmtl;
 
   glDeleteVertexArrays(1, (uint32_t *)&std::get<0>(t));
   glDeleteBuffers(1, (uint32_t *)&std::get<1>(t));
-
-  debug("mesh " << name << " will be deleted");
 
   mesh_map.erase(name);
 }

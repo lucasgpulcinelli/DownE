@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include "Shader.h"
+#include "WaveFrontMtl.h"
 
 #include <vector>
 
@@ -25,7 +26,7 @@ public:
   ~Mesh(void);
 
   // gets the VAO of the mesh.
-  int getVAO(void);
+  uint32_t getVAO(void);
 
   // gets the coordinate count of the mesh (such that getSize()/5 is the vertex
   // count).
@@ -40,14 +41,14 @@ public:
 
 private:
   std::string name;
-  int vao, vbo;
+  uint32_t vao, vbo;
   int size;
   std::vector<std::pair<int, int>> texture_indicies;
   std::vector<float> bounding_box;
 
-  // the texture_id map, mapping texture names (a file in res/textures/) to its
-  // id and count of instances.
-  static std::map<std::string, std::pair<int, int>> texture_id_map;
+  WaveFrontMtl *wfmtl;
+
+  void loadMesh(int shader_id);
 
   // the mesh map, mapping a mesh name to its properties: vao, vbo, size in
   // coordinates, texture_indicies vector, and count of instances.

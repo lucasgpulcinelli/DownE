@@ -4,17 +4,21 @@
 #include <fstream>
 #include <string>
 
+#include "Texture.h"
+
 namespace engine {
 
 class Material {
 private:
   std::string name;
-  std::string texture_file;
+  Texture *texture;
 
 public:
   Material(std::fstream &f);
+  ~Material(void);
+
   std::string getName(void) const;
-  std::string getTextureFile(void) const;
+  const Texture *getTexture(void) const;
 };
 
 } // namespace engine
