@@ -19,8 +19,9 @@ private:
 public:
   WaveFrontObj(std::string file);
 
-  const std::vector<float> &getTris(void);
-  const std::vector<std::pair<std::string, int>> &getMaterialIndicies(void);
+  const std::vector<float> &getTris(void) const;
+  const std::vector<std::pair<std::string, int>> &
+  getMaterialIndicies(void) const;
 };
 
 } // namespace engine

@@ -104,9 +104,9 @@ WaveFrontObj::WaveFrontObj(std::string file) {
                                   << material_indicies.size() << " materials");
 }
 
-const std::vector<float> &WaveFrontObj::getTris(void) { return tris; }
+const std::vector<float> &WaveFrontObj::getTris(void) const { return tris; }
 
 const std::vector<std::pair<std::string, int>> &
-WaveFrontObj::getMaterialIndicies(void) {
+WaveFrontObj::getMaterialIndicies(void) const {
   return material_indicies;
 }

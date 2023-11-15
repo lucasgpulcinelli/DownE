@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include "WaveFrontMtl.h"
 #include "WaveFrontObj.h"
 #include "utils.h"
 
@@ -18,33 +19,6 @@ extern "C" {
 using namespace engine;
 
 namespace {
-
-// readMaterialFile reads a mtl file and returns all important properties: the
-// map from material names to texture filenames
-std::map<std::string, std::string> readMaterialFile(std::string mtl_file) {
-  std::fstream f(mtl_file, std::ios_base::in);
-
-  std::string line;
-
-  std::map<std::string, std::string> out;
-  std::string current_name;
-
-  while (std::getline(f, line)) {
-    std::istringstream stream(line);
-
-    std::string s;
-    stream >> s;
-    if (s == "newmtl") {
-      stream >> current_name;
-    } else if (s == "map_Kd") {
-      std::string filename;
-      stream >> filename;
-      out[current_name] = filename;
-    }
-  }
-
-  return out;
-}
 
 // loadTexture creates a new opengl texture from a file and returns its id
 int loadTexture(std::string texture_file) {
@@ -93,16 +67,17 @@ loadMesh(int shader_id, std::string name,
   const std::string mesh_path = "res/meshes/" + name + "/mesh.obj";
   WaveFrontObj wfo(mesh_path);
 
-      // read the material file to get the map
-      const std::string mtl_path = "res/meshes/" + name + "/mesh.mtl";
-  auto texture_file_map = readMaterialFile(mtl_path);
+  // read the material file to get the map
+  const std::string mtl_path = "res/meshes/" + name + "/mesh.mtl";
+  WaveFrontMtl wfmtl(mtl_path);
 
   auto points = wfo.getTris();
   std::vector<std::pair<int, int>> texture_indicies;
 
   // for each material, add a texture index entry
   for (auto mat_i : wfo.getMaterialIndicies()) {
-    auto texture_file = texture_file_map[mat_i.first];
+    const Material &m = wfmtl.getMaterial(mat_i.first);
+    const std::string texture_file = m.getTextureFile();
 
     // if it was already loaded before, reuse the entry
     if (texture_id_map.find(texture_file) != texture_id_map.end()) {
