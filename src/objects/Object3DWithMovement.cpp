@@ -9,7 +9,7 @@ using namespace engine;
 std::set<Object3DWithMovement *> Object3DWithMovement::objs;
 
 Object3DWithMovement::Object3DWithMovement(std::string mesh_name, int activator)
-    : Object3D("simple3d", mesh_name) {
+    : Object3DWithLight("simple3d", mesh_name) {
   this->activator = activator;
   objs.insert(this);
 
@@ -189,7 +189,7 @@ void Object3DWithMovement::draw(int texture_id, int vao_id, int object_id) {
     return;
   }
 
-  Object3D::draw(texture_id, vao_id, object_id);
+  Object3DWithLight::draw(texture_id, vao_id, object_id);
 
   auto &keys = Engine::getEngine()->getPressedKeys();
 

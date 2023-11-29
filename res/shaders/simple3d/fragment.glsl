@@ -5,9 +5,9 @@ in vec2 frag_texture;
 in vec3 frag_normal;
 
 uniform sampler2D Texture;
-vec3 light_position = vec3(0, 1, -0.5);
+uniform vec3 light_position;
+uniform vec3 light_color;
 
-vec3 light_color = vec3(1, 1, 1);
 float kd = 2;
 float ka = 0.5;
 
