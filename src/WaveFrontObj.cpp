@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #include "utils.h"
@@ -13,7 +14,7 @@ using namespace engine;
 // chacter is a face (already read at this point) and adds the coordinates and
 // texture indicies to tries, reading from verticies and textures to do that.
 void WaveFrontObj::storeFace(std::istringstream &stream) {
-  std::vector<std::pair<int, int>> tri_indicies;
+  std::vector<std::tuple<int, int, int>> tri_indicies;
   int vi, vti, vni;
   std::string word;
 
@@ -28,29 +29,30 @@ void WaveFrontObj::storeFace(std::istringstream &stream) {
       error("loading meshes without textures not supported");
     }
 
-    tri_indicies.push_back({vi - 1, vti - 1});
+    tri_indicies.push_back({vi - 1, vti - 1, vni - 1});
   }
 
   // for each tuple, make a triangle such that the whole line equates to a
   // polygon
   for (int i = 1; i < (int)tri_indicies.size() - 1; i++) {
-    for (int j = 0; j < 3; j++) {
-      tris.push_back(verticies[tri_indicies[0].first * 3 + j]);
-    }
-    tris.push_back(textures[tri_indicies[0].second * 2]);
-    tris.push_back(textures[tri_indicies[0].second * 2 + 1]);
+    int indicies[] = {0, i, i + 1};
+    for (int j : indicies) {
+      int vi = std::get<0>(tri_indicies[j]);
+      int vti = std::get<1>(tri_indicies[j]);
+      int vni = std::get<2>(tri_indicies[j]);
 
-    for (int j = 0; j < 3; j++) {
-      tris.push_back(verticies[tri_indicies[i].first * 3 + j]);
-    }
-    tris.push_back(textures[tri_indicies[i].second * 2]);
-    tris.push_back(textures[tri_indicies[i].second * 2 + 1]);
+      for (int k = 0; k < 3; k++) {
+        tris.push_back(verticies[vi * 3 + k]);
+      }
 
-    for (int j = 0; j < 3; j++) {
-      tris.push_back(verticies[tri_indicies[i + 1].first * 3 + j]);
+      for (int k = 0; k < 2; k++) {
+        tris.push_back(textures[vti * 2 + k]);
+      }
+
+      for (int k = 0; k < 3; k++) {
+        tris.push_back(verticies[vni * 3 + k]);
+      }
     }
-    tris.push_back(textures[tri_indicies[i + 1].second * 2]);
-    tris.push_back(textures[tri_indicies[i + 1].second * 2 + 1]);
   }
 }
 
@@ -83,7 +85,7 @@ WaveFrontObj::WaveFrontObj(std::string file) {
       stream >> texture_name;
 
       debug("changed mtl to " << texture_name << " at vertex "
-                              << tris.size() / 5);
+                              << tris.size() / FLOATS_PER_VERTEX);
       material_indicies.push_back({texture_name, tris.size()});
     } else if (s == "vt") {
       // read the texel coordinates and store it in the textures array
@@ -100,7 +102,8 @@ WaveFrontObj::WaveFrontObj(std::string file) {
 
   f.close();
 
-  debug("done reading mesh, got " << tris.size() / 5 << " verticies and "
+  debug("done reading mesh, got " << tris.size() / FLOATS_PER_VERTEX
+                                  << " verticies and "
                                   << material_indicies.size() << " materials");
 }
 

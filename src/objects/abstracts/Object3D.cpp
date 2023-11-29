@@ -1,5 +1,6 @@
 #include "Object3D.h"
 
+#include "WaveFrontObj.h"
 #include "utils.h"
 
 extern "C" {
@@ -20,7 +21,7 @@ Object3D::Object3D(std::string shader_name, std::string mesh_name) {
 
   auto tex_i = m->getTextureIndicies();
   debug("3d object got " << tex_i.size() << " textures with a total of "
-                         << m->getSize() / 5 << " verticies");
+                         << m->getSize() / FLOATS_PER_VERTEX << " verticies");
 
   if (tex_i.size() == 0) {
     return;
@@ -70,14 +71,15 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
   glUniform3f(loc, position[0], position[1], position[2]);
 
   if (draw_triangles) {
-    glDrawArrays(GL_TRIANGLES, id_index_map[object_id].first / 5,
-                 id_index_map[object_id].second / 5);
+    glDrawArrays(GL_TRIANGLES,
+                 id_index_map[object_id].first / FLOATS_PER_VERTEX,
+                 id_index_map[object_id].second / FLOATS_PER_VERTEX);
     return;
   }
 
-  for (int i = id_index_map[object_id].first / 5;
-       i <
-       id_index_map[object_id].first / 5 + id_index_map[object_id].second / 5;
+  for (int i = id_index_map[object_id].first / FLOATS_PER_VERTEX;
+       i < id_index_map[object_id].first / FLOATS_PER_VERTEX +
+               id_index_map[object_id].second / FLOATS_PER_VERTEX;
        i += 3) {
 
     glDrawArrays(GL_LINE_LOOP, i, 3);

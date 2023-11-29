@@ -2,7 +2,9 @@
 #define MATERIAL_H
 
 #include <fstream>
+#include <map>
 #include <string>
+#include <vector>
 
 #include "Texture.h"
 
@@ -12,6 +14,7 @@ class Material {
 private:
   std::string name;
   Texture *texture;
+  std::map<std::string, std::vector<float>> properties_map;
 
 public:
   Material(std::fstream &f);

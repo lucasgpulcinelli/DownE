@@ -16,7 +16,7 @@ using namespace engine;
 
 // loadMesh creates a whole new mesh from a mesh name, using a certain
 // shader.
-// the method sets VAO and VBO ids, the mesh size, the relation between 
+// the method sets VAO and VBO ids, the mesh size, the relation between
 // textures and verticies indicies, and the bounding box for the object.
 void Mesh::loadMesh(int shader_id) {
   const std::string mesh_path = "res/meshes/" + name + "/mesh.obj";
@@ -43,7 +43,7 @@ void Mesh::loadMesh(int shader_id) {
   bounding_box[4] = 0;
   bounding_box[5] = 0;
 
-  for (int i = 0; i < size; i += 5) {
+  for (int i = 0; i < size; i += FLOATS_PER_VERTEX) {
     bounding_box[0] = std::min(bounding_box[0], points[i]);
     bounding_box[1] = std::min(bounding_box[1], points[i + 1]);
     bounding_box[2] = std::min(bounding_box[2], points[i + 2]);
@@ -68,11 +68,13 @@ void Mesh::loadMesh(int shader_id) {
 
   GLint loc = glGetAttribLocation(shader_id, "point");
   glEnableVertexAttribArray(loc);
-  glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), NULL);
+  glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE,
+                        FLOATS_PER_VERTEX * sizeof(float), NULL);
 
   loc = glGetAttribLocation(shader_id, "texture");
   glEnableVertexAttribArray(loc);
-  glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
+  glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE,
+                        FLOATS_PER_VERTEX * sizeof(float),
                         (void *)(sizeof(float) * 3));
 }
 

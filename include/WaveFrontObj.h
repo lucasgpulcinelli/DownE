@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#define FLOATS_PER_VERTEX 8
+
 namespace engine {
 
 class WaveFrontObj {
@@ -11,6 +13,7 @@ private:
   std::vector<float> tris;
   std::vector<float> verticies;
   std::vector<float> textures;
+  std::vector<float> vertex_normals;
 
   std::vector<std::pair<std::string, int>> material_indicies;
 
