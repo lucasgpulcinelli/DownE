@@ -76,6 +76,12 @@ void Mesh::loadMesh(int shader_id) {
   glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE,
                         FLOATS_PER_VERTEX * sizeof(float),
                         (void *)(sizeof(float) * 3));
+
+  loc = glGetAttribLocation(shader_id, "normal");
+  glEnableVertexAttribArray(loc);
+  glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE,
+                        FLOATS_PER_VERTEX * sizeof(float),
+                        (void *)(sizeof(float) * 5));
 }
 
 // vao, vbo, mesh size, texture indicies and starting vertex, and count

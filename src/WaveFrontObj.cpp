@@ -50,7 +50,7 @@ void WaveFrontObj::storeFace(std::istringstream &stream) {
       }
 
       for (int k = 0; k < 3; k++) {
-        tris.push_back(verticies[vni * 3 + k]);
+        tris.push_back(normals[vni * 3 + k]);
       }
     }
   }
@@ -94,6 +94,12 @@ WaveFrontObj::WaveFrontObj(std::string file) {
       stream >> u >> v;
       textures.push_back(u);
       textures.push_back(1 - v);
+    } else if (s == "vn") {
+      float x, y, z;
+      stream >> x >> y >> z;
+      normals.push_back(x);
+      normals.push_back(y);
+      normals.push_back(z);
     } else if (s == "f") {
       // read the face indicies and store them in the final tries array
       storeFace(stream);

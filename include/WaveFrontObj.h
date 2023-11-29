@@ -13,7 +13,7 @@ private:
   std::vector<float> tris;
   std::vector<float> verticies;
   std::vector<float> textures;
-  std::vector<float> vertex_normals;
+  std::vector<float> normals;
 
   std::vector<std::pair<std::string, int>> material_indicies;
 
