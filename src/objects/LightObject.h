@@ -6,7 +6,7 @@
 namespace engine {
 class LightObject : public Object3DWithLight {
 private:
-  static LightObject* single_light;
+  static LightObject *single_light;
   float color[3];
 
 public:
@@ -14,8 +14,8 @@ public:
   ~LightObject(void);
 
   void frame(void) override;
-  static const float* getPosition(void);
-  static const float* getColor(void);
+  static const float *getPosition(void);
+  static const float *getColor(void);
 };
 } // namespace engine
 

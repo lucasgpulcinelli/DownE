@@ -32,10 +32,11 @@ public:
   // count).
   int getSize(void);
 
-  // gets the texture indicies, meaning the vector of pairs where the first
-  // element is the texture that should be used, and the second is the first
-  // vertex that should have this texture applied.
-  const std::vector<std::pair<int, int>> &getTextureIndicies(void);
+  // gets the material indicies, meaning the vector of pairs where the first
+  // element is the material that should be used, and the second is the first
+  // vertex that should have this material applied.
+  const std::vector<std::pair<const Material *, int>> &
+  getMaterialIndicies(void);
 
   const std::vector<float> &getBoundingBox(void);
 
@@ -43,7 +44,7 @@ private:
   std::string name;
   uint32_t vao, vbo;
   int size;
-  std::vector<std::pair<int, int>> texture_indicies;
+  std::vector<std::pair<const Material *, int>> material_indicies;
   std::vector<float> bounding_box;
 
   WaveFrontMtl *wfmtl;
@@ -52,9 +53,10 @@ private:
 
   // the mesh map, mapping a mesh name to its properties: vao, vbo, size in
   // coordinates, texture_indicies vector, and count of instances.
-  static std::map<std::string,
-                  std::tuple<int, int, int, std::vector<std::pair<int, int>>,
-                             std::vector<float>, int>>
+  static std::map<
+      std::string,
+      std::tuple<int, int, int, std::vector<std::pair<const Material *, int>>,
+                 std::vector<float>, int>>
       mesh_map;
 };
 } // namespace engine

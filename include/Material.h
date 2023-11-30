@@ -22,6 +22,7 @@ public:
 
   std::string getName(void) const;
   const Texture *getTexture(void) const;
+  const std::map<std::string, std::vector<float>> *getProperties(void) const;
 };
 
 } // namespace engine

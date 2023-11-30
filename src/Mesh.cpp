@@ -28,9 +28,8 @@ void Mesh::loadMesh(int shader_id) {
   // for each material, add a texture index entry
   for (auto mat_i : wfo.getMaterialIndicies()) {
     const Material *m = wfmtl->getMaterial(mat_i.first);
-    const Texture *texture = m->getTexture();
 
-    texture_indicies.push_back({texture->getId(), mat_i.second});
+    material_indicies.push_back({m, mat_i.second});
   }
 
   auto points = wfo.getTris();
@@ -84,10 +83,10 @@ void Mesh::loadMesh(int shader_id) {
                         (void *)(sizeof(float) * 5));
 }
 
-// vao, vbo, mesh size, texture indicies and starting vertex, and count
-std::map<std::string,
-         std::tuple<int, int, int, std::vector<std::pair<int, int>>,
-                    std::vector<float>, int>>
+// vao, vbo, mesh size, material indicies and starting vertex, and count
+std::map<std::string, std::tuple<int, int, int,
+                                 std::vector<std::pair<const Material *, int>>,
+                                 std::vector<float>, int>>
     Mesh::mesh_map;
 
 Mesh::Mesh(Shader *s, std::string name) {
@@ -99,7 +98,7 @@ Mesh::Mesh(Shader *s, std::string name) {
     vao = std::get<0>(t);
     vbo = std::get<1>(t);
     size = std::get<2>(t);
-    texture_indicies = std::get<3>(t);
+    material_indicies = std::get<3>(t);
     bounding_box = std::get<4>(t);
     std::get<5>(t)++;
     return;
@@ -109,13 +108,14 @@ Mesh::Mesh(Shader *s, std::string name) {
 
   loadMesh(s->getShaderId());
 
-  mesh_map[name] = {vao, vbo, size, texture_indicies, bounding_box, 1};
+  mesh_map[name] = {vao, vbo, size, material_indicies, bounding_box, 1};
 }
 
 uint32_t Mesh::getVAO(void) { return vao; }
 
-const std::vector<std::pair<int, int>> &Mesh::getTextureIndicies(void) {
-  return texture_indicies;
+const std::vector<std::pair<const Material *, int>> &
+Mesh::getMaterialIndicies(void) {
+  return material_indicies;
 }
 
 int Mesh::getSize(void) { return size; }

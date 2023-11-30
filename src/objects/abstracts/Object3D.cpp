@@ -19,35 +19,40 @@ Object3D::Object3D(std::string shader_name, std::string mesh_name) {
 
   this->shader_id = s->getShaderId();
 
-  auto tex_i = m->getTextureIndicies();
-  debug("3d object got " << tex_i.size() << " textures with a total of "
+  auto material_i = m->getMaterialIndicies();
+  debug("3d object got " << material_i.size() << " materials with a total of "
                          << m->getSize() / FLOATS_PER_VERTEX << " verticies");
 
-  if (tex_i.size() == 0) {
+  if (material_i.size() == 0) {
     return;
   }
 
   // for each texture, prepare the id_index_map for use in the draw method.
   int i;
-  for (i = 0; i < (int)tex_i.size() - 1; i++) {
-    id_index_map[id_count] = {tex_i[i].second,
-                              tex_i[i + 1].second - tex_i[i].second};
+  for (i = 0; i < (int)material_i.size() - 1; i++) {
+    id_material_map[id_count] = {
+        material_i[i].second, material_i[i + 1].second - material_i[i].second,
+        material_i[i].first->getProperties()};
 
-    drawables.push_back(
-        {shader_id, tex_i[i].first, m->getVAO(), id_count, this});
+    drawables.push_back({shader_id, material_i[i].first->getTexture()->getId(),
+                         m->getVAO(), id_count, this});
     id_count++;
   }
 
   // make sure we draw until the end of the object.
-  id_index_map[id_count] = {tex_i[i].second, m->getSize() - tex_i[i].second};
-  drawables.push_back({shader_id, tex_i[i].first, m->getVAO(), id_count, this});
+  id_material_map[id_count] = {material_i[i].second,
+                               m->getSize() - material_i[i].second,
+                               material_i[i].first->getProperties()};
+
+  drawables.push_back({shader_id, material_i[i].first->getTexture()->getId(),
+                       m->getVAO(), id_count, this});
   id_count++;
 
   debug("done creating 3d object, ids:");
-  for (auto id_start_count : id_index_map) {
+  for (auto id_start_count : id_material_map) {
     debug("id " << id_start_count.first << ", start "
-                << id_start_count.second.first << ", count "
-                << id_start_count.second.second);
+                << std::get<0>(id_start_count.second) << ", count "
+                << std::get<1>(id_start_count.second));
   }
 }
 
@@ -70,17 +75,17 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
   loc = glGetUniformLocation(shader_id, "position");
   glUniform3f(loc, position[0], position[1], position[2]);
 
+  int start = std::get<0>(id_material_map[object_id]);
+  int count = std::get<1>(id_material_map[object_id]);
+
   if (draw_triangles) {
-    glDrawArrays(GL_TRIANGLES,
-                 id_index_map[object_id].first / FLOATS_PER_VERTEX,
-                 id_index_map[object_id].second / FLOATS_PER_VERTEX);
+    glDrawArrays(GL_TRIANGLES, start / FLOATS_PER_VERTEX,
+                 count / FLOATS_PER_VERTEX);
     return;
   }
 
-  for (int i = id_index_map[object_id].first / FLOATS_PER_VERTEX;
-       i < id_index_map[object_id].first / FLOATS_PER_VERTEX +
-               id_index_map[object_id].second / FLOATS_PER_VERTEX;
-       i += 3) {
+  for (int i = start / FLOATS_PER_VERTEX;
+       i < start / FLOATS_PER_VERTEX + count / FLOATS_PER_VERTEX; i += 3) {
 
     glDrawArrays(GL_LINE_LOOP, i, 3);
   }

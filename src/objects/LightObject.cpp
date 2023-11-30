@@ -52,10 +52,6 @@ void LightObject::frame(void) {
   }
 }
 
-const float* LightObject::getPosition(void) {
-  return single_light->position;
-}
+const float *LightObject::getPosition(void) { return single_light->position; }
 
-const float* LightObject::getColor(void) {
-  return single_light->color;
-}
+const float *LightObject::getColor(void) { return single_light->color; }

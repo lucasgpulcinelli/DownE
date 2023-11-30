@@ -1,6 +1,7 @@
 #ifndef OBJECT_3D_H
 #define OBJECT_3D_H
 
+#include "Material.h"
 #include "Mesh.h"
 #include "Object.h"
 #include "Shader.h"
@@ -13,12 +14,11 @@ class Object3D : public Object {
 private:
   static int id_count;
 
-  // the map from the internal drawble id to draw indicies: starting vertex
-  // coordinate index and count to draw. Used in glDrawArrays directly.
-  std::map<int, std::pair<int, int>> id_index_map;
-
-
 protected:
+  std::map<int, std::tuple<int, int,
+                           const std::map<std::string, std::vector<float>> *>>
+      id_material_map;
+
   int shader_id;
 
   Shader *s;
