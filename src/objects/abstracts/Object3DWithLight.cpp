@@ -29,12 +29,20 @@ void Object3DWithLight::draw(int texture_id, int vao_id, int object_id) {
 
   auto ka = properties_map->at("Ka");
   auto kd = properties_map->at("Kd");
+  auto ks = properties_map->at("Ks");
+  auto ns = properties_map->at("Ns");
 
   loc = glGetUniformLocation(shader_id, "ka");
   glUniform3f(loc, ka[0], ka[1], ka[2]);
 
   loc = glGetUniformLocation(shader_id, "kd");
   glUniform3f(loc, kd[0], kd[1], kd[2]);
+
+  loc = glGetUniformLocation(shader_id, "ks");
+  glUniform3f(loc, ks[0], ks[1], ks[2]);
+
+  loc = glGetUniformLocation(shader_id, "ns");
+  glUniform1f(loc, ns[0]);
 
   Object3D::draw(texture_id, vao_id, object_id);
 }
