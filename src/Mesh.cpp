@@ -78,7 +78,7 @@ void Mesh::loadMesh(int shader_id) {
 
   loc = glGetAttribLocation(shader_id, "normal");
   glEnableVertexAttribArray(loc);
-  glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE,
+  glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE,
                         FLOATS_PER_VERTEX * sizeof(float),
                         (void *)(sizeof(float) * 5));
 }
