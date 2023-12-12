@@ -7,6 +7,8 @@ in vec3 normal;
 uniform vec3 angle;
 uniform vec3 scale;
 uniform vec3 position;
+uniform vec2 camera_angle;
+uniform float ar;
 
 out vec3 frag_position;
 out vec2 frag_texture;
@@ -34,9 +36,42 @@ void main(){
     0,            0,  0,            1
   );
 
-  gl_Position = vec4(point, 1)*rx*ry*s_tr;
+  mat4 model_matrix = rx*ry*s_tr;
 
-  frag_position = gl_Position.xyz;
+  vec4 world_coordinates = vec4(point, 1)*model_matrix;
+
+
+  vec3 n = vec3(
+    cos(camera_angle.y)*sin(camera_angle.x),
+    sin(camera_angle.y),
+    cos(camera_angle.y)*cos(camera_angle.x)
+  );
+
+  vec3 u = normalize(cross(vec3(0, 1, 0), n));
+  vec3 v = normalize(cross(n, u));
+  vec3 camera_position = vec3(0, 0, 2);
+
+  mat4 view_matrix = mat4(
+    u.x, u.y, u.z, -dot(u, camera_position),
+    v.x, v.y, v.z, -dot(v, camera_position),
+    n.x, n.y, n.z, -dot(n, camera_position),
+    0, 0, 0, 1
+  );
+
+  float znear = 1;
+  float zfar = 40;
+  float fov = 3.14/4;
+
+  mat4 project_matrix = mat4(
+    1/(tan(fov/2)*ar), 0, 0, 0,
+    0, 1/tan(fov/2), 0, 0,
+    0, 0, (zfar+znear) / (znear - zfar), -1,
+    0, 0, 2*znear*zfar / (znear - zfar), 0
+  );
+
+  gl_Position = world_coordinates*view_matrix*project_matrix;
+
+  frag_position = world_coordinates.xyz;
   frag_texture = texture;
-  frag_normal = (vec4(normal, 1)*rx*ry*s_tr).xyz;
+  frag_normal = (vec4(normal, 1)*model_matrix).xyz;
 }

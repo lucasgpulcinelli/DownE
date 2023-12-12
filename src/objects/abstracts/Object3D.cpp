@@ -1,5 +1,7 @@
 #include "Object3D.h"
 
+#include "../CameraObject.h"
+#include "Engine.h"
 #include "WaveFrontObj.h"
 #include "utils.h"
 
@@ -74,6 +76,19 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
 
   loc = glGetUniformLocation(shader_id, "position");
   glUniform3f(loc, position[0], position[1], position[2]);
+
+  auto w_h = Engine::getEngine()->getWindowSize();
+  float ar = float(w_h.first) / w_h.second;
+
+  loc = glGetUniformLocation(shader_id, "ar");
+  glUniform1f(loc, ar);
+
+  auto *c = CameraObject::getCamera();
+  if (c != nullptr) {
+    loc = glGetUniformLocation(shader_id, "camera_angle");
+    const float *camera_angle = c->getViewAngle();
+    glUniform2f(loc, camera_angle[0], camera_angle[1]);
+  }
 
   int start = std::get<0>(id_material_map[object_id]);
   int count = std::get<1>(id_material_map[object_id]);

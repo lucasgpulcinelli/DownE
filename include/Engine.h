@@ -83,8 +83,8 @@ private:
   GLFWwindow *window;
 
   // inputCallback populates the pressed_keys set.
-  static void inputCallback(__attribute__((unused)) GLFWwindow *w, int key,
-                            int scan_code, int action, int modifiers);
+  static void inputCallback(GLFWwindow *, int key, int scan_code, int action,
+                            int modifiers);
 
   // the singleton Engine pointer
   static Engine *single_engine;

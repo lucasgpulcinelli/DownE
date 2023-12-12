@@ -13,10 +13,6 @@ Object3DWithMovement::Object3DWithMovement(std::string mesh_name, int activator)
   this->activator = activator;
   objs.insert(this);
 
-  auto w_h = Engine::getEngine()->getWindowSize();
-  ar = float(w_h.second) / w_h.first;
-  scales[0] = ar;
-
   changed_mesh_time = std::chrono::high_resolution_clock::now();
 }
 
@@ -39,77 +35,49 @@ void Object3DWithMovement::frame(void) {
 
   if (keys.find(GLFW_KEY_LEFT) != keys.end()) {
     angles[1] -= 0.05;
-    if (!boundBoxOk()) {
-      angles[1] += 0.05;
-    }
   }
 
   if (keys.find(GLFW_KEY_RIGHT) != keys.end()) {
     angles[1] += 0.05;
-    if (!boundBoxOk()) {
-      angles[1] -= 0.05;
-    }
   }
 
   if (keys.find(GLFW_KEY_UP) != keys.end()) {
     angles[0] += 0.05;
-    if (!boundBoxOk()) {
-      angles[0] -= 0.05;
-    }
   }
 
   if (keys.find(GLFW_KEY_DOWN) != keys.end()) {
     angles[0] -= 0.05;
-    if (!boundBoxOk()) {
-      angles[0] += 0.05;
-    }
   }
 
   if (keys.find(GLFW_KEY_Z) != keys.end()) {
-    scales[0] += 0.01 * ar;
+    scales[0] += 0.01;
     scales[1] += 0.01;
     scales[2] += 0.01;
-    if (!boundBoxOk()) {
-      scales[0] -= 0.01 * ar;
-      scales[1] -= 0.01;
-      scales[2] -= 0.01;
-    }
   }
 
   if (keys.find(GLFW_KEY_X) != keys.end()) {
-    scales[0] -= 0.01 * ar;
+    scales[0] -= 0.01;
     scales[1] -= 0.01;
     scales[2] -= 0.01;
-    if (!boundBoxOk()) {
-      scales[0] += 0.01 * ar;
-      scales[1] += 0.01;
-      scales[2] += 0.01;
-    }
   }
 
   if (keys.find(GLFW_KEY_W) != keys.end()) {
     position[1] += 0.05;
-    if (!boundBoxOk()) {
-      position[1] -= 0.05;
-    }
   }
   if (keys.find(GLFW_KEY_A) != keys.end()) {
     position[0] -= 0.05;
-    if (!boundBoxOk()) {
-      position[0] += 0.05;
-    }
   }
   if (keys.find(GLFW_KEY_S) != keys.end()) {
     position[1] -= 0.05;
-    if (!boundBoxOk()) {
-      position[1] += 0.05;
-    }
   }
   if (keys.find(GLFW_KEY_D) != keys.end()) {
     position[0] += 0.05;
-    if (!boundBoxOk()) {
-      position[0] -= 0.05;
-    }
+  }
+  if (keys.find(GLFW_KEY_SPACE) != keys.end()) {
+    position[2] += 0.05;
+  }
+  if (keys.find(GLFW_KEY_B) != keys.end()) {
+    position[2] -= 0.05;
   }
 
   if (keys.find(GLFW_KEY_P) != keys.end()) {

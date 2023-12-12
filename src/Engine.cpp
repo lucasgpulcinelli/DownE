@@ -1,5 +1,6 @@
 #include "Engine.h"
 
+#include "objects/CameraObject.h"
 #include "objects/abstracts/Object.h"
 #include "utils.h"
 
@@ -12,8 +13,7 @@ Engine *Engine::single_engine = nullptr;
 
 namespace {
 void messageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
-                     __attribute__((unused)) GLsizei len, const GLchar *message,
-                     __attribute__((unused)) const void *user_param) {
+                     GLsizei, const GLchar *message, const void *) {
   if (type == GL_DEBUG_TYPE_ERROR) {
     error("opengl error: " << source << id << severity << " " << message);
   } else {
@@ -22,8 +22,8 @@ void messageCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
 }
 } // namespace
 
-void Engine::inputCallback(__attribute__((unused)) GLFWwindow *w, int key,
-                           int scan_code, int action, int modifiers) {
+void Engine::inputCallback(GLFWwindow *, int key, int scan_code, int action,
+                           int modifiers) {
   debug("key pressed: " << key << " " << scan_code << " " << action << " "
                         << modifiers);
 
@@ -78,6 +78,11 @@ Engine::Engine(void) {
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  addObject(new CameraObject);
+
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPosCallback(window, CameraObject::mouseCallback);
 
   info("engine initalized");
 }
