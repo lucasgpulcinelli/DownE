@@ -28,6 +28,28 @@ CameraObject::~CameraObject(void) {
 CameraObject *CameraObject::getCamera(void) { return single_camera; }
 
 void CameraObject::frame(void) {
+  auto keys = Engine::getEngine()->getPressedKeys();
+
+  if (keys.find(GLFW_KEY_I) != keys.end()) {
+    position[1] += 0.05;
+  }
+  if (keys.find(GLFW_KEY_U) != keys.end()) {
+    position[1] -= 0.05;
+  }
+  if (keys.find(GLFW_KEY_Y) != keys.end()) {
+    position[0] -= 0.05;
+  }
+  if (keys.find(GLFW_KEY_O) != keys.end()) {
+    position[0] += 0.05;
+  }
+
+  if (keys.find(GLFW_KEY_R) != keys.end()) {
+    position[2] += 0.05;
+  }
+  if (keys.find(GLFW_KEY_T) != keys.end()) {
+    position[2] -= 0.05;
+  }
+
   for (int i = 0; i < 3; i++) {
     if (position[i] > 10) {
       position[i] = 10;
@@ -56,12 +78,10 @@ void CameraObject::mouseCallback(GLFWwindow *w, double x, double y) {
   }
 
   if (c->view_angle[0] < 0) {
-    c->view_angle[0] = 2*M_PI;
-  } else if (c->view_angle[0] > 2*M_PI) {
+    c->view_angle[0] = 2 * M_PI;
+  } else if (c->view_angle[0] > 2 * M_PI) {
     c->view_angle[0] = 0;
   }
-
-  std::cout << c->view_angle[0] << " " << c->view_angle[1] << std::endl;
 
   glfwSetCursorPos(w, 0, 0);
 }

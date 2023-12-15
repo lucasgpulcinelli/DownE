@@ -1,5 +1,6 @@
 #include "Object3DWithLight.h"
 
+#include "../CameraObject.h"
 #include "../LightObject.h"
 #include "utils.h"
 
@@ -24,6 +25,12 @@ void Object3DWithLight::draw(int texture_id, int vao_id, int object_id) {
 
   loc = glGetUniformLocation(shader_id, "light_color");
   glUniform3f(loc, light_color[0], light_color[1], light_color[2]);
+
+  CameraObject *c = CameraObject::getCamera();
+  const float *cpos = c->getPosition();
+
+  loc = glGetUniformLocation(shader_id, "view_position");
+  glUniform3f(loc, cpos[0], cpos[1], cpos[2]);
 
   auto *properties_map = std::get<2>(id_material_map[object_id]);
 

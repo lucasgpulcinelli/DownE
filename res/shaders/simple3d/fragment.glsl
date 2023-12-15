@@ -11,7 +11,7 @@ uniform vec3 kd;
 uniform vec3 ka;
 uniform vec3 ks;
 uniform float ns;
-vec3 view_position = vec3(0, 0, -1);
+uniform vec3 view_position;
 
 void main(){
   vec3 fnormal = normalize(frag_normal);

@@ -8,6 +8,7 @@ uniform vec3 angle;
 uniform vec3 scale;
 uniform vec3 position;
 uniform vec2 camera_angle;
+uniform vec3 view_position;
 uniform float ar;
 
 out vec3 frag_position;
@@ -49,12 +50,11 @@ void main(){
 
   vec3 u = normalize(cross(vec3(0, 1, 0), n));
   vec3 v = normalize(cross(n, u));
-  vec3 camera_position = vec3(0, 0, 2);
 
   mat4 view_matrix = mat4(
-    u.x, u.y, u.z, -dot(u, camera_position),
-    v.x, v.y, v.z, -dot(v, camera_position),
-    n.x, n.y, n.z, -dot(n, camera_position),
+    u.x, u.y, u.z, -dot(u, view_position),
+    v.x, v.y, v.z, -dot(v, view_position),
+    n.x, n.y, n.z, -dot(n, view_position),
     0, 0, 0, 1
   );
 
