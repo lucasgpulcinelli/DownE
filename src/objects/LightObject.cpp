@@ -50,6 +50,8 @@ void LightObject::frame(void) {
   if (keys.find(GLFW_KEY_F) != keys.end()) {
     position[1] += 0.05;
   }
+
+  checkSkybox();
 }
 
 const float *LightObject::getPosition(void) { return single_light->position; }

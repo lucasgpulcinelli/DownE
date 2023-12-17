@@ -36,6 +36,8 @@ public:
   Object3D(std::string shader_name, std::string mesh_name);
   ~Object3D();
 
+  void checkSkybox(void);
+
   void draw(int texture_id, int vao_id, int object_id) override;
 };
 } // namespace engine

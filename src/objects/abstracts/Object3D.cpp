@@ -1,9 +1,14 @@
+#include <eigen3/Eigen/Dense>
+
 #include "Object3D.h"
 
 #include "../CameraObject.h"
+#include "../Skybox.h"
 #include "Engine.h"
 #include "WaveFrontObj.h"
 #include "utils.h"
+
+#include <cmath>
 
 extern "C" {
 #include <GL/glew.h>
@@ -103,5 +108,61 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
        i < start / FLOATS_PER_VERTEX + count / FLOATS_PER_VERTEX; i += 3) {
 
     glDrawArrays(GL_LINE_LOOP, i, 3);
+  }
+}
+
+void Object3D::checkSkybox(void) {
+  float hp = 0;
+  auto bbox = m->getBoundingBox();
+
+  Eigen::Matrix4f tr_s =
+      (Eigen::Matrix4f() << scales[0], 0, 0, position[0], 0, scales[1], 0,
+       position[1], 0, 0, scales[2], position[2], 0, 0, 0, 1)
+          .finished();
+
+  Eigen::Matrix4f rx =
+      (Eigen::Matrix4f() << 1, 0, 0, 0, 0, cos(angles[0]), -sin(angles[0]), 0,
+       0, sin(angles[0]), cos(angles[0]), 0, 0, 0, 0, 1)
+          .finished();
+
+  Eigen::Matrix4f ry =
+      (Eigen::Matrix4f() << cos(angles[1]), 0, -sin(angles[1]), 0, 0, 1, 0, 0,
+       sin(angles[1]), 0, cos(angles[1]), 0, 0, 0, 0, 1)
+          .finished();
+
+  // use i as a bit mask: if the bit is zero, use the minimum coordinate, else
+  // use the maximum coordinate
+  for (int i = 0; i < 8; i++) {
+    float x, y, z;
+    if (i & 0b001) {
+      x = bbox[0];
+    } else {
+      x = bbox[3];
+    }
+
+    if (i & 0b010) {
+      y = bbox[1];
+    } else {
+      y = bbox[4];
+    }
+
+    if (i & 0b100) {
+      z = bbox[2];
+    } else {
+      z = bbox[5];
+    }
+
+    Eigen::Vector4f in_point(x, y, z, 1);
+    Eigen::Vector4f out_point = tr_s * ry * rx * in_point;
+
+    hp = std::max(hp, std::hypot(out_point.x(), out_point.y(), out_point.z()));
+  }
+
+  float skyboxr = Skybox::getSkyboxRadius();
+
+  if (hp > skyboxr - 0.1) {
+    for (int i = 0; i < 3; i++) {
+      position[i] *= (skyboxr - 0.1) / hp;
+    }
   }
 }

@@ -4,7 +4,7 @@
 #include "abstracts/Object3D.h"
 
 namespace engine {
-class Object3DWithLight : public engine::Object3D {
+class Object3DWithLight : public Object3D {
 private:
   static float ambient_light_color[3];
 

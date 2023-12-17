@@ -1,7 +1,9 @@
 #include "CameraObject.h"
 #include "Engine.h"
+#include "Skybox.h"
 #include "utils.h"
 
+#include <cmath>
 #include <math.h>
 
 using namespace engine;
@@ -54,12 +56,12 @@ void CameraObject::frame(void) {
     position[1] -= 0.05;
   }
 
-  for (int i = 0; i < 3; i++) {
-    if (position[i] > 10) {
-      position[i] = 10;
-    }
-    if (position[i] < -10) {
-      position[i] = -10;
+  float skyboxr = Skybox::getSkyboxRadius();
+
+  float hp = std::hypot(position[0], position[1], position[2]);
+  if (hp > skyboxr - 0.8) {
+    for (int i = 0; i < 3; i++) {
+      position[i] *= (skyboxr - 0.8) / hp;
     }
   }
 }
