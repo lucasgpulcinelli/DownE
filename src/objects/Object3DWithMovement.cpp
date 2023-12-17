@@ -8,8 +8,9 @@ using namespace engine;
 
 std::set<Object3DWithMovement *> Object3DWithMovement::objs;
 
-Object3DWithMovement::Object3DWithMovement(std::string mesh_name, int activator)
-    : Object3DWithLight("simple3d", mesh_name) {
+Object3DWithMovement::Object3DWithMovement(float position[3],
+                                           std::string mesh_name, int activator)
+    : Object3DWithLight(position, "simple3d", mesh_name) {
   this->activator = activator;
   objs.insert(this);
 
@@ -24,12 +25,12 @@ void Object3DWithMovement::frame(void) {
       if (obj == this) {
         continue;
       }
-      obj->skip_draw = true;
+      obj->skip_logic = true;
     }
-    this->skip_draw = false;
+    this->skip_logic = false;
   }
 
-  if (skip_draw) {
+  if (skip_logic) {
     return;
   }
 
@@ -157,9 +158,6 @@ bool Object3DWithMovement::boundBoxOk(void) {
 }
 
 void Object3DWithMovement::draw(int texture_id, int vao_id, int object_id) {
-  if (skip_draw) {
-    return;
-  }
 
   Object3DWithLight::draw(texture_id, vao_id, object_id);
 

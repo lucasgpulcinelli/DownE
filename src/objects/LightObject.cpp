@@ -10,7 +10,7 @@ using namespace engine;
 LightObject *LightObject::single_light = nullptr;
 
 LightObject::LightObject(float position[3], float color[3])
-    : Object3DWithLight("simple3d", "light") {
+    : Object3DWithLight(position, "simple3d", "light") {
 
   if (single_light != nullptr) {
     error("error: more than one light source is not supported");

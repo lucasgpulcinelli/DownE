@@ -18,8 +18,13 @@ using namespace engine;
 
 int Object3D::id_count = 0;
 
-Object3D::Object3D(std::string shader_name, std::string mesh_name) {
+Object3D::Object3D(float initial_position[3], std::string shader_name,
+                   std::string mesh_name) {
   debug("starting 3d object creation");
+
+  position[0] = initial_position[0];
+  position[1] = initial_position[1];
+  position[2] = initial_position[2];
 
   s = new Shader(shader_name);
   m = new Mesh(s, mesh_name);

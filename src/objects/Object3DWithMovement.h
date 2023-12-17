@@ -17,7 +17,7 @@ namespace engine {
 class Object3DWithMovement : public Object3DWithLight {
 private:
   int activator;
-  bool skip_draw = true;
+  bool skip_logic = true;
   static std::set<Object3DWithMovement *> objs;
   int textures_filter = GL_LINEAR;
   std::chrono::time_point<std::chrono::high_resolution_clock> changed_mesh_time;
@@ -25,7 +25,7 @@ private:
   bool boundBoxOk(void);
 
 public:
-  Object3DWithMovement(std::string mesh_name, int activator);
+  Object3DWithMovement(float position[3], std::string mesh_name, int activator);
 
   void frame(void) override;
 

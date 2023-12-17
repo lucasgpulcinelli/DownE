@@ -33,7 +33,8 @@ protected:
   bool draw_triangles = true;
 
 public:
-  Object3D(std::string shader_name, std::string mesh_name);
+  Object3D(float initial_position[3], std::string shader_name,
+           std::string mesh_name);
   ~Object3D();
 
   void checkSkybox(void);

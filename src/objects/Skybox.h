@@ -9,7 +9,11 @@ private:
   static Skybox *single_skybox;
 
 public:
-  Skybox() : Object3DWithLight("simple3d", "skybox") { single_skybox = this; }
+  Skybox()
+      : Object3DWithLight(std::array<float, 3>{0, 0, 0}.data(), "simple3d",
+                          "skybox") {
+    single_skybox = this;
+  }
   static float getSkyboxRadius(void) {
     return std::abs(single_skybox->m->getBoundingBox()[0]);
   }

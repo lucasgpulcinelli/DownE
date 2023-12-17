@@ -15,9 +15,9 @@ using namespace engine;
 
 float Object3DWithLight::ambient_light_color[3] = {1, 1, 1};
 
-Object3DWithLight::Object3DWithLight(std::string shader_name,
+Object3DWithLight::Object3DWithLight(float position[3], std::string shader_name,
                                      std::string mesh_name)
-    : Object3D(shader_name, mesh_name) {}
+    : Object3D(position, shader_name, mesh_name) {}
 
 void Object3DWithLight::draw(int texture_id, int vao_id, int object_id) {
   const float *light_position = LightObject::getPosition();

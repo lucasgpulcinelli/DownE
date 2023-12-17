@@ -9,7 +9,8 @@ private:
   static float ambient_light_color[3];
 
 public:
-  Object3DWithLight(std::string shader_name, std::string mesh_name);
+  Object3DWithLight(float position[3], std::string shader_name,
+                    std::string mesh_name);
 
   void frame(void) override;
   void draw(int texture_id, int vao_id, int object_id) override;
