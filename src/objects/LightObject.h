@@ -1,7 +1,7 @@
 #ifndef LIGHT_OBJECT_H
 #define LIGHT_OBJECT_H
 
-#include "abstracts/Object3DWithLight.h"
+#include "Object3DWithLight.h"
 
 namespace engine {
 class LightObject : public Object3DWithLight {

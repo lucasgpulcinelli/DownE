@@ -1,7 +1,8 @@
 #include "Object3DWithLight.h"
 
-#include "../CameraObject.h"
-#include "../LightObject.h"
+#include "CameraObject.h"
+#include "Engine.h"
+#include "LightObject.h"
 #include "utils.h"
 
 #include <stdexcept>
@@ -11,6 +12,8 @@ extern "C" {
 }
 
 using namespace engine;
+
+float Object3DWithLight::ambient_light_color[3] = {1, 1, 1};
 
 Object3DWithLight::Object3DWithLight(std::string shader_name,
                                      std::string mesh_name)
@@ -25,6 +28,10 @@ void Object3DWithLight::draw(int texture_id, int vao_id, int object_id) {
 
   loc = glGetUniformLocation(shader_id, "light_color");
   glUniform3f(loc, light_color[0], light_color[1], light_color[2]);
+
+  loc = glGetUniformLocation(shader_id, "ambient_light_color");
+  glUniform3f(loc, ambient_light_color[0], ambient_light_color[1],
+              ambient_light_color[2]);
 
   CameraObject *c = CameraObject::getCamera();
   const float *cpos = c->getPosition();
@@ -52,4 +59,27 @@ void Object3DWithLight::draw(int texture_id, int vao_id, int object_id) {
   glUniform1f(loc, ns[0]);
 
   Object3D::draw(texture_id, vao_id, object_id);
+}
+
+void Object3DWithLight::frame(void) {
+  auto &keys = Engine::getEngine()->getPressedKeys();
+
+  if (keys.find(GLFW_KEY_R) != keys.end()) {
+    ambient_light_color[0] += 0.05;
+  }
+  if (keys.find(GLFW_KEY_T) != keys.end()) {
+    ambient_light_color[1] += 0.05;
+  }
+  if (keys.find(GLFW_KEY_Y) != keys.end()) {
+    ambient_light_color[2] += 0.05;
+  }
+  if (keys.find(GLFW_KEY_U) != keys.end()) {
+    ambient_light_color[0] -= 0.05;
+  }
+  if (keys.find(GLFW_KEY_I) != keys.end()) {
+    ambient_light_color[1] -= 0.05;
+  }
+  if (keys.find(GLFW_KEY_O) != keys.end()) {
+    ambient_light_color[2] -= 0.05;
+  }
 }

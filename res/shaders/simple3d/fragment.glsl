@@ -7,6 +7,7 @@ in vec3 frag_normal;
 uniform sampler2D Texture;
 uniform vec3 light_position;
 uniform vec3 light_color;
+uniform vec3 ambient_light_color;
 uniform vec3 kd;
 uniform vec3 ka;
 uniform vec3 ks;
@@ -19,7 +20,7 @@ void main(){
   float illumination = max(dot(fnormal, light_direction), 0);
   vec3 diffuse_light = kd * illumination * light_color;
 
-  vec3 ambient_light = ka * vec3(1, 1, 1);
+  vec3 ambient_light = ka * ambient_light_color;
 
   vec3 view_direction = normalize(view_position - frag_position);
   vec3 reflection_direction = normalize(reflect(-light_direction, fnormal));

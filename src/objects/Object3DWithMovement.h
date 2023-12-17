@@ -1,4 +1,4 @@
-#include "abstracts/Object3DWithLight.h"
+#include "Object3DWithLight.h"
 
 #include "Engine.h"
 

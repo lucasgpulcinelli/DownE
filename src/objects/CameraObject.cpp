@@ -30,24 +30,28 @@ CameraObject *CameraObject::getCamera(void) { return single_camera; }
 void CameraObject::frame(void) {
   auto keys = Engine::getEngine()->getPressedKeys();
 
-  if (keys.find(GLFW_KEY_I) != keys.end()) {
-    position[1] += 0.05;
+  if (keys.find(GLFW_KEY_W) != keys.end()) {
+    position[0] -= 0.05 * std::sin(view_angle[0]);
+    position[2] -= 0.05 * std::cos(view_angle[0]);
   }
-  if (keys.find(GLFW_KEY_U) != keys.end()) {
-    position[1] -= 0.05;
+  if (keys.find(GLFW_KEY_S) != keys.end()) {
+    position[0] += 0.05 * std::sin(view_angle[0]);
+    position[2] += 0.05 * std::cos(view_angle[0]);
   }
-  if (keys.find(GLFW_KEY_Y) != keys.end()) {
-    position[0] -= 0.05;
+  if (keys.find(GLFW_KEY_A) != keys.end()) {
+    position[0] -= 0.05 * std::cos(view_angle[0]);
+    position[2] += 0.05 * std::sin(view_angle[0]);
   }
-  if (keys.find(GLFW_KEY_O) != keys.end()) {
-    position[0] += 0.05;
+  if (keys.find(GLFW_KEY_D) != keys.end()) {
+    position[0] += 0.05 * std::cos(view_angle[0]);
+    position[2] -= 0.05 * std::sin(view_angle[0]);
   }
 
-  if (keys.find(GLFW_KEY_R) != keys.end()) {
-    position[2] += 0.05;
+  if (keys.find(GLFW_KEY_SPACE) != keys.end()) {
+    position[1] += 0.05;
   }
-  if (keys.find(GLFW_KEY_T) != keys.end()) {
-    position[2] -= 0.05;
+  if (keys.find(GLFW_KEY_E) != keys.end()) {
+    position[1] -= 0.05;
   }
 
   for (int i = 0; i < 3; i++) {

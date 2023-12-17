@@ -1,6 +1,6 @@
 #include "LightObject.h"
 
-#include "abstracts/Object3DWithLight.h"
+#include "Object3DWithLight.h"
 
 #include "Engine.h"
 #include "utils.h"
@@ -32,10 +32,10 @@ void LightObject::frame(void) {
   auto keys = Engine::getEngine()->getPressedKeys();
 
   if (keys.find(GLFW_KEY_K) != keys.end()) {
-    position[1] += 0.05;
+    position[2] += 0.05;
   }
   if (keys.find(GLFW_KEY_J) != keys.end()) {
-    position[1] -= 0.05;
+    position[2] -= 0.05;
   }
   if (keys.find(GLFW_KEY_H) != keys.end()) {
     position[0] -= 0.05;
@@ -44,11 +44,11 @@ void LightObject::frame(void) {
     position[0] += 0.05;
   }
 
-  if (keys.find(GLFW_KEY_N) != keys.end()) {
-    position[2] -= 0.05;
+  if (keys.find(GLFW_KEY_G) != keys.end()) {
+    position[1] -= 0.05;
   }
-  if (keys.find(GLFW_KEY_M) != keys.end()) {
-    position[2] += 0.05;
+  if (keys.find(GLFW_KEY_F) != keys.end()) {
+    position[1] += 0.05;
   }
 }
 
