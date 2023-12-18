@@ -17,6 +17,7 @@ extern "C" {
 using namespace engine;
 
 int Object3D::id_count = 0;
+bool Object3D::draw_triangles = true;
 
 Object3D::Object3D(float initial_position[3], std::string shader_name,
                    std::string mesh_name) {

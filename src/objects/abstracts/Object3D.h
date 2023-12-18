@@ -30,7 +30,7 @@ protected:
 
   // if the object should be drawn as triangles or lines. Note that drawing
   // lines is less efficient because of the Mesh VAO layout.
-  bool draw_triangles = true;
+  static bool draw_triangles;
 
 public:
   Object3D(float initial_position[3], std::string shader_name,
