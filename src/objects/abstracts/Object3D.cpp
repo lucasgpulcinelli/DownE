@@ -119,6 +119,7 @@ void Object3D::draw(int texture_id, int vao_id, int object_id) {
 
 void Object3D::checkSkybox(void) {
   float hp = 0;
+  float min_y = 1e9;
   auto bbox = m->getBoundingBox();
 
   Eigen::Matrix4f tr_s =
@@ -162,6 +163,7 @@ void Object3D::checkSkybox(void) {
     Eigen::Vector4f out_point = tr_s * ry * rx * in_point;
 
     hp = std::max(hp, std::hypot(out_point.x(), out_point.y(), out_point.z()));
+    min_y = std::min(min_y, out_point.y());
   }
 
   float skyboxr = Skybox::getSkyboxRadius();
@@ -170,5 +172,9 @@ void Object3D::checkSkybox(void) {
     for (int i = 0; i < 3; i++) {
       position[i] *= (skyboxr - 0.1) / hp;
     }
+  }
+
+  if (min_y < 0) {
+    position[1] += -min_y;
   }
 }

@@ -7,18 +7,31 @@
 using namespace engine;
 
 std::set<Object3DWithMovement *> Object3DWithMovement::objs;
+std::chrono::time_point<std::chrono::high_resolution_clock>
+    Object3DWithMovement::changed_mesh_time =
+        std::chrono::high_resolution_clock::now();
 
 Object3DWithMovement::Object3DWithMovement(float position[3],
                                            std::string mesh_name, int activator)
     : Object3DWithLight(position, "simple3d", mesh_name) {
   this->activator = activator;
   objs.insert(this);
-
-  changed_mesh_time = std::chrono::high_resolution_clock::now();
 }
 
 void Object3DWithMovement::frame(void) {
   auto &keys = Engine::getEngine()->getPressedKeys();
+
+  if (keys.find(GLFW_KEY_P) != keys.end()) {
+    auto time_now = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> delta = time_now - changed_mesh_time;
+    if (delta.count() < 0.5) {
+      return;
+    }
+
+    changed_mesh_time = time_now;
+
+    draw_triangles = !draw_triangles;
+  }
 
   if (keys.find(activator) != keys.end()) {
     for (auto *obj : objs) {
@@ -81,21 +94,7 @@ void Object3DWithMovement::frame(void) {
     position[1] -= 0.05;
   }
 
-  if (keys.find(GLFW_KEY_P) != keys.end()) {
-    auto time_now = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> delta = time_now - changed_mesh_time;
-    if (delta.count() < 0.5) {
-      return;
-    }
-
-    changed_mesh_time = time_now;
-
-    draw_triangles = !draw_triangles;
-  }
-
   checkSkybox();
-
-  Object3DWithLight::frame();
 }
 
 bool Object3DWithMovement::boundBoxOk(void) {
@@ -166,7 +165,7 @@ void Object3DWithMovement::draw(int texture_id, int vao_id, int object_id) {
   // this functionality must be done here because the texture is already
   // bound, and doing so in the frame function would cause racing condition
   // problems (because draw and frame execute in different threads)
-  if (keys.find(GLFW_KEY_PERIOD) != keys.end()) {
+  if (!skip_logic && keys.find(GLFW_KEY_PERIOD) != keys.end()) {
     auto time_now = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> delta = time_now - changed_mesh_time;
     if (delta.count() < 0.5) {

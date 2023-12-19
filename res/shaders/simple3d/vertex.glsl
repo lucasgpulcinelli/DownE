@@ -73,5 +73,5 @@ void main(){
 
   frag_position = world_coordinates.xyz;
   frag_texture = texture;
-  frag_normal = (vec4(normal, 1)*model_matrix).xyz;
+  frag_normal = (vec4(normal, 1)*rx*ry).xyz;
 }

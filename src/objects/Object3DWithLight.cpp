@@ -82,4 +82,11 @@ void Object3DWithLight::frame(void) {
   if (keys.find(GLFW_KEY_O) != keys.end()) {
     ambient_light_color[2] -= 0.05;
   }
+
+  ambient_light_color[0] = std::min(ambient_light_color[0], 1.0f);
+  ambient_light_color[1] = std::min(ambient_light_color[1], 1.0f);
+  ambient_light_color[2] = std::min(ambient_light_color[2], 1.0f);
+  ambient_light_color[0] = std::max(ambient_light_color[0], 0.0f);
+  ambient_light_color[1] = std::max(ambient_light_color[1], 0.0f);
+  ambient_light_color[2] = std::max(ambient_light_color[2], 0.0f);
 }

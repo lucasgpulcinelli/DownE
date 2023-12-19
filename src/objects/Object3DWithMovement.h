@@ -20,7 +20,9 @@ private:
   bool skip_logic = true;
   static std::set<Object3DWithMovement *> objs;
   int textures_filter = GL_LINEAR;
-  std::chrono::time_point<std::chrono::high_resolution_clock> changed_mesh_time;
+
+  static std::chrono::time_point<std::chrono::high_resolution_clock>
+      changed_mesh_time;
 
   bool boundBoxOk(void);
 

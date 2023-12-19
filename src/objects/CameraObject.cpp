@@ -64,6 +64,10 @@ void CameraObject::frame(void) {
       position[i] *= (skyboxr - 0.8) / hp;
     }
   }
+
+  if (position[1] < 0.5) {
+    position[1] = 0.5;
+  }
 }
 
 void CameraObject::mouseCallback(GLFWwindow *w, double x, double y) {
