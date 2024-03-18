@@ -5,6 +5,7 @@ DownE is a low level engine made in C++, using opengl and a whole lot of object 
 All functions are documented in their respective headers (aside from main.cpp).
 
 ### How to compile the code
+First, install glew-dev, glfw3-dev and eigen3-dev headers.
 Use `make all` to compile the code and `./build/main` to start it.
 
 ### Usage
