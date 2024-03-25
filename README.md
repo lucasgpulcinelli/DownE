@@ -6,7 +6,8 @@ All functions are documented in their respective headers (aside from main.cpp).
 
 ### How to compile the code
 First, install glew-dev, glfw3-dev and eigen3-dev headers.
-Use `make all` to compile the code and `./build/main` to start it.
+Then, either install or download the stb_image.h library and put it into the include/ directory.
+Finally, use `make all` to compile the code and `./build/main` to start it.
 
 ### Usage
 The program uses basically the whole keyboard for different actions because of assinment requirements and personal objectives:
